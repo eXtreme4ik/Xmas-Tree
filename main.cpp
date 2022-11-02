@@ -64,12 +64,13 @@
 #define SUBMODE_STAR 2   // Подрежим - Звезда
 #define SUBMODE_ALL 0    // Подрежим - Всё вместе
 
-#define BRIGHT_MAX 255 // Максимально возможная яркость
+#define BRIGHT_MAX 200  // Максимально возможная яркость
 #define SPEED_MAX 10000 // Максимально возможное замедление
-#define SPEED_STEP 500 // Шаг изменения замедления
+#define SPEED_STEP 500  // Шаг изменения замедления
 #define SPEED_MIN 500
-#define CORRECT_SPEED_RAINBOW (1)
-#define BRIGHT_STEP BRIGHT_MAX / 20 // Шаг изменения яркости
+#define CORRECT_SPEED_RAINBOW 10
+#define SPEED_RAINBOW_COEF sp
+#define BRIGHT_STEP BRIGHT_MAX / 30 // Шаг изменения яркости
 
 //-----------------------------MACRO FOR ADC CALCULATE----------------\/
 
@@ -137,9 +138,9 @@ Adafruit_NeoPixel star(LED_STAR, STAR_PIN, TYPELED + LEDSPEED);
 
 void setupInterrupt(void);
 void setupStripe(Adafruit_NeoPixel &strip, uint8_t brightness);
-void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, char sp);
+void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
 #ifdef FOUR_STRIPES
-void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, char sp);
+void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
 #endif
 
 //----------------------------VARIABLES-----------------------\/
@@ -179,6 +180,73 @@ bool sync = false;   // Флаг синхронизации программы �
 //....................................................................................
 ISR(TIMER2_OVF_vect)
 {
+  switch (mode)
+  {
+  case MODE_DEFAULT:
+  {
+    digitalWrite(LED_BLUE, 1);
+    digitalWrite(LED_GREEN, 1);
+    digitalWrite(LED_RED, 1);
+    digitalWrite(LED_YELLOW, 1);
+  }
+  break;
+  case MODE_STRIPE:
+  {
+    digitalWrite(LED_GREEN, 1);
+    digitalWrite(LED_RED, 1);
+    digitalWrite(LED_YELLOW, 1);
+  }
+  break;
+  case MODE_PROGRAMM:
+  {
+    digitalWrite(LED_GREEN, 0);
+    digitalWrite(LED_RED, 1);
+    digitalWrite(LED_YELLOW, 1);
+  }
+  break;
+  case MODE_BRIGHTLESS:
+  {
+    digitalWrite(LED_RED, 0);
+    digitalWrite(LED_YELLOW, 1);
+    digitalWrite(LED_GREEN, 1);
+  }
+  break;
+  case MODE_SPEED:
+  {
+    digitalWrite(LED_YELLOW, 0);
+    digitalWrite(LED_RED, 1);
+    digitalWrite(LED_GREEN, 1);
+  }
+  break;
+  }
+  if (mode != MODE_DEFAULT)
+  {
+    if (submode == SUBMODE_ALL)
+    {
+      digitalWrite(LED_BLUE, 0);
+    }
+    if (submode == SUBMODE_STRIPE)
+    {
+      if (strobe == 50)
+        digitalWrite(LED_BLUE, 0);
+      if (strobe > 100)
+      {
+        digitalWrite(LED_BLUE, 1);
+        strobe = 0;
+      }
+    }
+    if (submode == SUBMODE_STAR)
+    {
+      if (strobe == 50)
+        digitalWrite(LED_BLUE, 0);
+      if (strobe > 55)
+      {
+        digitalWrite(LED_BLUE, 1);
+        strobe = 0;
+      }
+    }
+  }
+  strobe++;
 }
 //....................................................................................
 //....................................................................................
@@ -415,76 +483,6 @@ ISR(TIMER1_OVF_vect)
       }
     }
   }
-  strobe++;
-  switch (mode)
-  {
-  case MODE_DEFAULT:
-    break;
-  case MODE_STRIPE:
-  {
-    digitalWrite(LED_GREEN, 1);
-    digitalWrite(LED_RED, 1);
-    digitalWrite(LED_YELLOW, 1);
-  }
-  break;
-  case MODE_PROGRAMM:
-  {
-    digitalWrite(LED_GREEN, 0);
-    digitalWrite(LED_RED, 1);
-    digitalWrite(LED_YELLOW, 1);
-  }
-  break;
-  case MODE_BRIGHTLESS:
-  {
-    digitalWrite(LED_RED, 0);
-    digitalWrite(LED_YELLOW, 1);
-    digitalWrite(LED_GREEN, 1);
-  }
-  break;
-  case MODE_SPEED:
-  {
-    digitalWrite(LED_YELLOW, 0);
-    digitalWrite(LED_RED, 1);
-    digitalWrite(LED_GREEN, 1);
-  }
-  break;
-  }
-  if (mode == MODE_DEFAULT)
-  {
-    digitalWrite(LED_BLUE, 1);
-    digitalWrite(LED_GREEN, 1);
-    digitalWrite(LED_RED, 1);
-    digitalWrite(LED_YELLOW, 1);
-  }
-  else
-  {
-    if (submode == SUBMODE_ALL)
-    {
-      digitalWrite(LED_BLUE, 0);
-    }
-    if (submode == SUBMODE_STRIPE)
-    {
-      if (strobe == 50)
-      {
-        digitalWrite(LED_BLUE, 0);
-      }
-      else if (strobe == 100)
-      {
-        digitalWrite(LED_BLUE, 1);
-        strobe = 0;
-      }
-    }
-    if (submode == SUBMODE_STAR)
-    {
-      if (strobe == 50)
-      {
-        digitalWrite(LED_BLUE, 0);
-        strobe = 0;
-      }
-      else
-        digitalWrite(LED_BLUE, 1);
-    }
-  }
 }
 //....................................................................................
 //....................................................................................
@@ -498,8 +496,8 @@ void setup()
     eeprom_write_byte((uint8_t *)0x02, progStar);
     eeprom_write_byte((uint8_t *)0x03, brightStripe);
     eeprom_write_byte((uint8_t *)0x04, brightStar);
-    eeprom_write_byte((uint8_t *)0x05, speedStripe/100);
-    eeprom_write_byte((uint8_t *)0x06, speedStar/100);
+    eeprom_write_byte((uint8_t *)0x05, speedStripe / 100);
+    eeprom_write_byte((uint8_t *)0x06, speedStar / 100);
   }
   else
   {
@@ -507,8 +505,8 @@ void setup()
     progStar = eeprom_read_byte((uint8_t *)0x02);
     brightStripe = eeprom_read_byte((uint8_t *)0x03);
     brightStar = eeprom_read_byte((uint8_t *)0x04);
-    speedStripe = eeprom_read_byte((uint8_t *)0x05)*100;
-    speedStar = eeprom_read_byte((uint8_t *)0x06)*100;
+    speedStripe = eeprom_read_byte((uint8_t *)0x05) * 100;
+    speedStar = eeprom_read_byte((uint8_t *)0x06) * 100;
   }
   Serial.begin(9600);
   pinMode(LED_BLUE, OUTPUT);
@@ -589,8 +587,8 @@ void loop()
     eeprom_write_byte((uint8_t *)0x02, progStar);
     eeprom_write_byte((uint8_t *)0x03, brightStripe);
     eeprom_write_byte((uint8_t *)0x04, brightStar);
-    eeprom_write_byte((uint8_t *)0x05, speedStripe/100);
-    eeprom_write_byte((uint8_t *)0x06, speedStar/100);
+    eeprom_write_byte((uint8_t *)0x05, speedStripe / 100);
+    eeprom_write_byte((uint8_t *)0x06, speedStar / 100);
     cli();
     digitalWrite(LED_BLUE, 0);
     digitalWrite(LED_GREEN, 0);
@@ -634,7 +632,7 @@ void setupStripe(Adafruit_NeoPixel &strip, uint8_t brightness)
 }
 //....................................................................................
 //....................................................................................
-void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, char sp)
+void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, int sp)
 {
   uint32_t colRand = strip.gamma32(strip.ColorHSV((uint16_t)random()));
   uint8_t num = random();
@@ -672,8 +670,8 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
         uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
         strip.setPixelColor(c, color);                       // Set pixel 'c' to value 'color'
       }
-      strip.show();                      // Update strip with new contents
-      firstPixelHue += 65536 / sp; // One cycle of color wheel over 90 frames
+      strip.show();                                // Update strip with new contents
+      firstPixelHue += 65536 / SPEED_RAINBOW_COEF; // One cycle of color wheel over 90 frames
     }
   }
   break;
@@ -694,9 +692,10 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
   {
     for (int i = 0; i < 5; i++)
     {
-      uint8_t snows = random(100);
+      uint8_t snows = random(255);
+      uint8_t snowB = snows - snows / 3;
       num = random(strip.numPixels());
-      strip.setPixelColor(num, strip.Color(snows, snows, snows));
+      strip.setPixelColor(num, strip.Color(snows, snows, snowB));
     }
     strip.show();
     strip.clear();
@@ -708,9 +707,10 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
     {
       for (uint16_t c = b; c < strip.numPixels(); c += 3)
       {
-        uint8_t hue = random(100);
-        uint32_t color = strip.Color(hue, hue, hue); // hue -> RGB
-        strip.setPixelColor(c, color);               // Set pixel 'c' to value 'color'
+        uint8_t snows = random(255);
+        uint8_t snowB = snows - snows / 5;
+        uint32_t color = strip.Color(snows, snows, snowB);
+        strip.setPixelColor(c, color);
       }
       strip.show();
     }
@@ -727,12 +727,12 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
     }
     for (int a = 5; a < 10; a++)
     {
-      uint16_t hue = firstPixelHue + 65536 / 2;
+      uint16_t hue = firstPixelHue + 65536 / 5;
       uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
       strip.setPixelColor(a, color);
     }
     strip.show();
-    firstPixelHue += 65536 / sp;
+    firstPixelHue += 65536 / SPEED_RAINBOW_COEF;
   }
   break;
 #endif
@@ -741,28 +741,32 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
     if (programma > 6)
       programma = 1;
     if (programma == 0)
+    {
       programma = 6;
+#ifdef FOUR_STRIPES
+      programma = 7;
+#endif
+    }
   }
   break;
   }
 }
 #ifdef FOUR_STRIPES
-void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, char sp)
+void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp)
 {
-  uint32_t colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
-  uint8_t num = random();
+  uint32_t colRand;
+  uint8_t num;
   switch (programma)
   {
 
   case 1: // RANDOM CLEAR
   {
     // int k = millis();
-    while (num > stripe[0].numPixels())
-    {
-      num = random();
-    }
+
     for (int i = 0; i < 4; i++)
     {
+      colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
+      num = random(stripe[0].numPixels());
       stripe[i].setPixelColor(num, colRand);
       stripe[i].show();
       stripe[i].clear();
@@ -773,6 +777,7 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
   case 2: // RANDOM NON CLEAR
   {
     num = random(stripe[0].numPixels());
+    colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
     for (int i = 0; i < 4; i++)
     {
       stripe[i].setPixelColor(num, colRand);
@@ -790,11 +795,11 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
         uint16_t hue = firstPixelHue + c * 65536L / stripe[0].numPixels();
         uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
         for (int i = 0; i < 4; i++)
-          stripe[i].setPixelColor(c, color); // Set pixel 'c' to value 'color'
+          stripe[i].setPixelColor(c, color);
       }
       for (int i = 0; i < 4; i++)
-        stripe[i].show();                // Update strip with new contents
-      firstPixelHue += 65536 / sp; // One cycle of color wheel over 90 frames
+        stripe[i].show();
+      firstPixelHue += 65536 / SPEED_RAINBOW_COEF;
     }
   }
   break;
@@ -808,6 +813,7 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
 
     for (int i = 0; i < 4; i++)
     {
+      colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
       stripe[i].setPixelColor(roundcount, colRand);
       stripe[i].setPixelColor(roundcount - 1, stripe[i].Color(0, 0, 0));
       stripe[i].show();
@@ -817,10 +823,11 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
   break;
   case 5: // SMALL SNOW
   {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 3; i++)
     {
-      uint8_t snows = random(100);
-      uint32_t color = stripe[0].Color(snows, snows, snows);
+      uint8_t snows = random(255);
+      uint8_t snowB = snows - snows / 5;
+      uint32_t color = stripe[0].Color(snows, snows, snowB);
       num = random(stripe[0].numPixels());
       for (int i = 0; i < 4; i++)
         stripe[i].setPixelColor(num, color);
@@ -838,10 +845,11 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
     {
       for (uint16_t c = b; c < stripe[0].numPixels(); c += 3)
       {
-        uint8_t hue = random(100);
-        uint32_t color = stripe[0].Color(hue, hue, hue); // hue -> RGB
+        uint8_t snows = random(255);
+        uint8_t snowB = snows - snows / 5;
+        uint32_t color = stripe[0].Color(snows, snows, snowB);
         for (int i = 0; i < 4; i++)
-          stripe[i].setPixelColor(c, color); // Set pixel 'c' to value 'color'
+          stripe[i].setPixelColor(c, color);
       }
       for (int i = 0; i < 4; i++)
         stripe[i].show();
@@ -873,7 +881,7 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
       stripe[i].show();
       firstPixelHue += 65536 / 4;
     }
-    firstPixelHue += 65536 / sp;
+    firstPixelHue += 65536 / SPEED_RAINBOW_COEF;
   }
   break;
   default:
