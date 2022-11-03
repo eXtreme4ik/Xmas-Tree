@@ -1,3 +1,4 @@
+#include <Arduino.h>
 // Copy from here-----------------------------------------------------\/
 //----,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,----------------------------------\/
 //---|                              |---------------------------------\/
@@ -16,35 +17,34 @@
 
 //--------------------------HARDWARE PRESETS--------------------------\/
 
-#define LED_TOTAL 82 // Общее количество светодиодов в Ёлке
-//#define LED_STAR 8   // Количество светодиодов звезды (с обоих сторон последовательно) (TEST)
-#define LED_STAR 10     // Количество светодиодов звезды (с обоих сторон последовательно)
-#define LED_STRIPE_UP 18
-#define LED_STRIPE_BOTTOM 8
-#define LED_STRIPE_BETWEEN 14
-// #define LED_4STRIPE 16 // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок (TEST)
-#define LED_4STRIPE 18  // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок
-// #define LED_1STRIPE 32 // Количество светодиодов в одной полоске (4 полоски последовательно) (TEST)
-#define LED_1STRIPE 72  // Количество светодиодов в одной полоске (4 полоски последовательно)
+#define LED_TOTAL 82            // Общее количество светодиодов в Ёлке
+// #define LED_STAR 8              // Количество светодиодов звезды (с обоих сторон последовательно) (TEST)
+#define LED_STAR 10             // Количество светодиодов звезды (с обоих сторон последовательно)
+// #define LED_4STRIPE 16          // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок (TEST)
+#define LED_4STRIPE 18          // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок
+// #define LED_1STRIPE 32           // Количество светодиодов в одной полоске (4 полоски последовательно) (TEST)
+#define LED_1STRIPE 72          // Количество светодиодов в одной полоске (4 полоски последовательно)
+
 #ifdef ONE_STRIPE
-#define STRIPE_PIN 5 // Пин ленты
+#define STRIPE_PIN 5            // Пин ленты
 #endif
+
 #ifdef FOUR_STRIPES
-#define STRIPE0_PIN 5 // Пин ленты
-#define STRIPE1_PIN 6 // Пин второй ленты
-#define STRIPE2_PIN 7 // Пин третьей ленты
-#define STRIPE3_PIN 8 // Пин четвертой ленты
+#define STRIPE0_PIN 5           // Пин ленты
+#define STRIPE1_PIN 6           // Пин второй ленты
+#define STRIPE2_PIN 7           // Пин третьей ленты
+#define STRIPE3_PIN 8           // Пин четвертой ленты
+#define LED_STRIPE_UP 18        // Макс значение для верхнего уровня
+#define LED_STRIPE_BOTTOM 8     // Макс значение для нижнего уровня
+#define LED_STRIPE_BETWEEN 14   // Макс значение для среднего уровня
 #endif
-#define STAR_PIN 9         // Пин ленты звезды
-#define BUTTONS_ADC_PIN 14 // Пин кнопок
-#define SW1 1              // Кнопки
-#define SW2 2
-#define SW3 3
-#define SW4 4
-#define LED_BLUE 15
-#define LED_GREEN 16
-#define LED_RED 17
-#define LED_YELLOW 18
+
+#define STAR_PIN 9              // Пин ленты звезды
+#define BUTTONS_ADC_PIN 14      // Пин кнопок
+#define LED_BLUE 15             //Пин синего светодиода
+#define LED_GREEN 16            //Пин зеленого светодиода
+#define LED_RED 17              //Пин красного светодиода
+#define LED_YELLOW 18           //Пин желтого светодиода
 
 //--------------------------SOFTWARE PRESETS--------------------------\/
 
@@ -68,8 +68,9 @@
 #define SPEED_MAX 10000               // Максимально возможное замедление
 #define SPEED_STEP 500                // Шаг изменения замедления
 #define SPEED_MIN 500                 // Минимально возможное замедление (Далее всё сливается в кучу)
-#define CORRECT_SPEED_RAINBOW (1)     // Коэффициент коррекции скорости радуги
-#define BRIGHT_STEP BRIGHT_MAX / 20   // Шаг изменения яркости
+#define CORRECT_SPEED_RAINBOW 10      // Коэффициент коррекции скорости режима rainbow
+#define SPEED_RAINBOW_COEF sp         // Переменная коррекции скорости режима rainbow
+#define BRIGHT_STEP BRIGHT_MAX / 30   // Шаг изменения яркости
 
 //-----------------------------MACRO FOR ADC CALCULATE----------------\/
 
@@ -87,11 +88,10 @@
     else                         \
       x = 0;                     \
   } while (0)
-
-// 1 is between 1.6-1.8V (VCC=5V) ~SW1
-// 2 is between 2.4-2.6V (VCC=5V) ~SW2
-// 3 is between 3.2-3.4V (VCC=5V) ~SW3
-// 4 is between 2.9-3.1V (VCC=5V) ~SW4
+#define SW1 1     // 1 is between 1.6-1.8V (VCC=5V) ~SW1
+#define SW2 2     // 2 is between 2.4-2.6V (VCC=5V) ~SW2
+#define SW3 3     // 3 is between 3.2-3.4V (VCC=5V) ~SW3
+#define SW4 4     // 4 is between 2.9-3.1V (VCC=5V) ~SW4
 
 //-----------------------------PRESETS FOR MACRO---------------------\/
 
@@ -150,7 +150,7 @@ void setupStripe(Adafruit_NeoPixel &strip, uint8_t brightness);
     @param  sp Параметр скорости Rainbow
     @return  void
   */
-void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, char sp);
+void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
 #ifdef FOUR_STRIPES
 /*!
     @brief  Функция вызова цикла программы для 4-х строк
@@ -160,7 +160,7 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
     @param  sp Параметр скорости Rainbow
     @return  void
   */
-void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, char sp);
+void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
 #endif
 
 //----------------------------VARIABLES-----------------------\/
@@ -198,12 +198,495 @@ bool sync = false;   // Флаг синхронизации программы �
 //....................................................................................
 //....................................................................................
 //....................................................................................
-ISR(TIMER2_OVF_vect)
+void setup()
 {
+  firststart = eeprom_read_byte((uint8_t *)0x00);
+  if (firststart != 13) // Если первый запуск Запоминаем стандартно проинициализированные переменные
+  {
+    eeprom_write_byte((uint8_t *)0x00, 13); // Записываем значение первого запуска
+    eeprom_write_byte((uint8_t *)0x01, progStripe);
+    eeprom_write_byte((uint8_t *)0x02, progStar);
+    eeprom_write_byte((uint8_t *)0x03, brightStripe);
+    eeprom_write_byte((uint8_t *)0x04, brightStar);
+    eeprom_write_byte((uint8_t *)0x05, speedStripe / 100);
+    eeprom_write_byte((uint8_t *)0x06, speedStar / 100);
+  }
+  else  // Если не первый запуск загружаем переменные из ЕЕPROM
+  {
+    progStripe = eeprom_read_byte((uint8_t *)0x01);
+    progStar = eeprom_read_byte((uint8_t *)0x02);
+    brightStripe = eeprom_read_byte((uint8_t *)0x03);
+    brightStar = eeprom_read_byte((uint8_t *)0x04);
+    speedStripe = eeprom_read_byte((uint8_t *)0x05) * 100;
+    speedStar = eeprom_read_byte((uint8_t *)0x06) * 100;
+  }
+  // Запускаем отладочный UART
+  Serial.begin(9600);
+  // Инициализируем порты светодиодов
+  pinMode(LED_MODE, OUTPUT);
+  pinMode(LED_BRIGHT, OUTPUT);
+  pinMode(LED_PROGRAMM, OUTPUT);
+  pinMode(LED_SPEED, OUTPUT);
+  // Настраиваем таймер1 и таймер2 на прерывания по переполнению 
+  setupInterrupt();
+  //
+#ifdef ONE_STRIPE
+  setupStripe(stripe, 100);
+#endif
+#ifdef FOUR_STRIPES
+  // Записываем В массив для простоты обращения к полоскам светодиодов
+  stripe[0] = stripe1;
+  stripe[1] = stripe2;
+  stripe[2] = stripe3;
+  stripe[3] = stripe4;
+  // И настраиваем полоски
+  for (int i = 0; i < 4; i++)
+    setupStripe(stripe[i], 50);
+#endif
+  // настраиваем Звезду
+  setupStripe(star, 50);
 }
 //....................................................................................
 //....................................................................................
-ISR(TIMER1_OVF_vect)
+void loop()
+{
+  // Serial.println(speedStripe);
+#ifdef ONE_STRIPE
+  stripe.setBrightness(brightStripe);
+#endif
+#ifdef FOUR_STRIPES
+  for (int i = 0; i < 4; i++)
+    stripe[i].setBrightness(brightStripe);
+#endif
+  star.setBrightness(brightStar);
+  if (speedStripe - 1 <= progCountStripe) // Если попали в Каунтер, запускаем функцию Ёлки
+  {
+#ifdef ONE_STRIPE
+    statefunction(stripe, progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
+#endif
+#ifdef FOUR_STRIPES
+    statefunction4stripes(progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
+#endif
+    progCountStripe = 0; // Обнуляем каунтер
+  }
+  if (speedStar - 1 <= progCountStar) // Если попали в Каунтер, запускаем функцию Звезды
+  {
+    if (progStar == 4 && progStripe == 4) // Если программа Ёлки и Звезды - бегущий огонь, синхронизируем их
+    {
+#ifdef ONE_STRIPE
+      if (roundcountStripe == stripe.numPixels())
+        sync = true;
+#endif
+#ifdef FOUR_STRIPES
+      if (roundcountStripe == stripe[0].numPixels())
+        sync = true;
+#endif
+      if (sync == true)
+      {
+        statefunction(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
+      }
+      if (roundcountStar == star.numPixels() + 1)
+      {
+        star.clear();
+        star.show();
+        sync = false;
+      }
+    }
+    else // Иначе просто запускаем программу
+      statefunction(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
+    progCountStar = 0;
+  }
+  progCountStar++; // Увеличиваем Каунтеры каждый цикл
+  progCountStripe++;  // Увеличиваем Каунтеры каждый цикл
+  if (save == true)
+  {
+
+    eeprom_write_byte((uint8_t *)0x00, 13);
+    eeprom_write_byte((uint8_t *)0x01, progStripe);
+    eeprom_write_byte((uint8_t *)0x02, progStar);
+    eeprom_write_byte((uint8_t *)0x03, brightStripe);
+    eeprom_write_byte((uint8_t *)0x04, brightStar);
+    eeprom_write_byte((uint8_t *)0x05, speedStripe / 100);
+    eeprom_write_byte((uint8_t *)0x06, speedStar / 100);
+    cli();
+    digitalWrite(LED_MODE, 0);
+    digitalWrite(LED_PROGRAMM, 0);
+    digitalWrite(LED_BRIGHT, 0);
+    digitalWrite(LED_SPEED, 0);
+    _delay_ms(1000);
+    digitalWrite(LED_MODE, 1);
+    digitalWrite(LED_PROGRAMM, 1);
+    digitalWrite(LED_BRIGHT, 1);
+    digitalWrite(LED_SPEED, 1);
+    save = false;
+    sei();
+  }
+}
+//....................................................................................
+//....................................................................................
+void setupInterrupt(void)
+{
+  cli();
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCCR2A = 0;
+
+  // Подключение прерывания по переполнению Timer2
+  TIMSK2 = 1 << TOIE2;
+
+  // Подключение прерывания по переполнению Timer1
+  TIMSK1 = (1 << TOIE1);
+  // Установить таймер на тактовой частоте:
+  TCCR1B |= (1 << CS10);
+  TCCR2B |= (1 << CS20);
+  sei();
+}
+//....................................................................................
+//....................................................................................
+void setupStripe(Adafruit_NeoPixel &strip, uint8_t brightness)
+{
+  strip.begin();
+  strip.show();
+  strip.setBrightness(brightness);
+}
+//....................................................................................
+//....................................................................................
+void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, int sp)
+{
+  uint32_t colRand = strip.gamma32(strip.ColorHSV((uint16_t)random()));
+  uint8_t num = random();
+  switch (programma)
+  {
+
+  case 1: // RANDOM CLEAR
+  {
+    // int k = millis();
+    while (num > strip.numPixels())
+    {
+      num = random();
+    }
+    strip.setPixelColor(num, colRand);
+    strip.show();
+    strip.clear();
+  }
+  break;
+
+  case 2: // RANDOM NON CLEAR
+  {
+    num = random(strip.numPixels());
+    strip.setPixelColor(num, colRand);
+    strip.show();
+  }
+  break;
+
+  case 3: // RAINBOW
+  {
+    for (int b = 0; b < 3; b++)
+    {
+      for (uint16_t c = b; c < strip.numPixels(); c += 3)
+      {
+        uint16_t hue = firstPixelHue + c * 65536L / strip.numPixels();
+        uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
+        strip.setPixelColor(c, color);                       // Set pixel 'c' to value 'color'
+      }
+      strip.show();                                // Update strip with new contents
+      firstPixelHue += 65536 / SPEED_RAINBOW_COEF; // One cycle of color wheel over 90 frames
+    }
+  }
+  break;
+
+  case 4: // ROUNDPIXEL
+  {
+    if (roundcount > strip.numPixels())
+    {
+      roundcount = 0;
+    }
+    strip.setPixelColor(roundcount, colRand);
+    strip.setPixelColor(roundcount - 1, strip.Color(0, 0, 0));
+    strip.show();
+    roundcount++;
+  }
+  break;
+  case 5: // SMALL SNOW
+  {
+    for (int i = 0; i < 5; i++)
+    {
+      uint8_t snows = random(255);
+      uint8_t snowB = snows - snows / 3;
+      num = random(strip.numPixels());
+      strip.setPixelColor(num, strip.Color(snows, snows, snowB));
+    }
+    strip.show();
+    strip.clear();
+  }
+  break;
+  case 6: // SNOW STORM
+  {
+    for (int b = 0; b < 3; b++)
+    {
+      for (uint16_t c = b; c < strip.numPixels(); c += 3)
+      {
+        uint8_t snows = random(255);
+        uint8_t snowB = snows - snows / 5;
+        uint32_t color = strip.Color(snows, snows, snowB);
+        strip.setPixelColor(c, color);
+      }
+      strip.show();
+    }
+  }
+  break;
+#ifdef FOUR_STRIPES
+  case 7: // RAINBOW PER 1 SITE
+  {
+    for (int a = 0; a < 5; a++)
+    {
+      uint16_t hue = firstPixelHue;
+      uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
+      strip.setPixelColor(a, color);
+    }
+    for (int a = 5; a < 10; a++)
+    {
+      uint16_t hue = firstPixelHue + 65536 / 5;
+      uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
+      strip.setPixelColor(a, color);
+    }
+    strip.show();
+    firstPixelHue += 65536 / SPEED_RAINBOW_COEF;
+  }
+  break;
+#endif
+  default:
+  {
+    if (programma > 6)
+      programma = 1;
+    if (programma == 0)
+    {
+      programma = 6;
+#ifdef FOUR_STRIPES
+      programma = 7;
+#endif
+    }
+  }
+  break;
+  }
+}
+#ifdef FOUR_STRIPES // ФУНКЦИЯ ОБРАБОТКИ ОДНОВРЕМЕННО 4-Х ПОЛОСОК
+void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp)
+{
+  uint32_t colRand;
+  uint8_t num;
+  switch (programma)
+  {
+
+  case 1: // RANDOM CLEAR
+  {
+    // int k = millis();
+
+    for (int i = 0; i < 4; i++)
+    {
+      colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
+      num = random(stripe[0].numPixels());
+      stripe[i].setPixelColor(num, colRand);
+      stripe[i].show();
+      stripe[i].clear();
+    }
+  }
+  break;
+
+  case 2: // RANDOM NON CLEAR
+  {
+    num = random(stripe[0].numPixels());
+    colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
+    for (int i = 0; i < 4; i++)
+    {
+      stripe[i].setPixelColor(num, colRand);
+      stripe[i].show();
+    }
+  }
+  break;
+
+  case 3: // RAINBOW
+  {
+    for (int b = 0; b < 3; b++)
+    {
+      for (uint16_t c = b; c < stripe[0].numPixels(); c += 3)
+      {
+        uint16_t hue = firstPixelHue + c * 65536L / stripe[0].numPixels();
+        uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
+        for (int i = 0; i < 4; i++)
+          stripe[i].setPixelColor(c, color);
+      }
+      for (int i = 0; i < 4; i++)
+        stripe[i].show();
+      firstPixelHue += 65536 / SPEED_RAINBOW_COEF;
+    }
+  }
+  break;
+
+  case 4: // ROUNDPIXEL
+  {
+    if (roundcount > stripe[0].numPixels() + 1)
+    {
+      roundcount = 0;
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+      colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
+      stripe[i].setPixelColor(roundcount, colRand);
+      stripe[i].setPixelColor(roundcount - 1, stripe[i].Color(0, 0, 0));
+      stripe[i].show();
+    }
+    roundcount++;
+  }
+  break;
+  case 5: // SMALL SNOW
+  {
+    for (int i = 0; i < 3; i++)
+    {
+      uint8_t snows = random(255);
+      uint8_t snowB = snows - snows / 5;
+      uint32_t color = stripe[0].Color(snows, snows, snowB);
+      num = random(stripe[0].numPixels());
+      for (int i = 0; i < 4; i++)
+        stripe[i].setPixelColor(num, color);
+    }
+    for (int i = 0; i < 4; i++)
+    {
+      stripe[i].show();
+      stripe[i].clear();
+    }
+  }
+  break;
+  case 6: // SNOW STORM
+  {
+    for (int b = 0; b < 3; b++)
+    {
+      for (uint16_t c = b; c < stripe[0].numPixels(); c += 3)
+      {
+        uint8_t snows = random(255);
+        uint8_t snowB = snows - snows / 5;
+        uint32_t color = stripe[0].Color(snows, snows, snowB);
+        for (int i = 0; i < 4; i++)
+          stripe[i].setPixelColor(c, color);
+      }
+      for (int i = 0; i < 4; i++)
+        stripe[i].show();
+    }
+  }
+  break;
+  case 7: // RAINBOW PER 1 SITE
+  {
+    for (int i = 0; i < 4; i++)
+    {
+      for (int a = 0; a < LED_STRIPE_BOTTOM; a++)
+      {
+        uint16_t hue = firstPixelHue + 65536 / 4;
+        uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
+        stripe[i].setPixelColor(a, color);
+      }
+      for (int a = LED_STRIPE_BOTTOM; a < LED_STRIPE_BETWEEN; a++)
+      {
+        uint16_t hue = firstPixelHue + 65536 / 4 + 65536 / 4;
+        uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
+        stripe[i].setPixelColor(a, color);
+      }
+      for (int a = LED_STRIPE_BETWEEN; a < LED_STRIPE_UP; a++)
+      {
+        uint16_t hue = firstPixelHue + 65536 / 4 + 65536 / 4 + 65536 / 4;
+        uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
+        stripe[i].setPixelColor(a, color);
+      }
+      stripe[i].show();
+      firstPixelHue += 65536 / 4;
+    }
+    firstPixelHue += 65536 / SPEED_RAINBOW_COEF;
+  }
+  break;
+  default:
+  {
+    if (programma > 7)
+      programma = 1;
+    if (programma == 0)
+      programma = 7;
+  }
+  break;
+  }
+}
+#endif
+extern "C" void __vector_9 (void) __attribute__ ((signal, used, externally_visible)) ; void __vector_9 (void)
+{
+  switch (mode)
+  {
+  case MODE_DEFAULT:
+  {
+    digitalWrite(LED_MODE, 1);
+    digitalWrite(LED_PROGRAMM, 1);
+    digitalWrite(LED_BRIGHT, 1);
+    digitalWrite(LED_SPEED, 1);
+  }
+  break;
+  case MODE_STRIPE:
+  {
+    digitalWrite(LED_PROGRAMM, 1);
+    digitalWrite(LED_BRIGHT, 1);
+    digitalWrite(LED_SPEED, 1);
+  }
+  break;
+  case MODE_PROGRAMM:
+  {
+    digitalWrite(LED_PROGRAMM, 0);
+    digitalWrite(LED_BRIGHT, 1);
+    digitalWrite(LED_SPEED, 1);
+  }
+  break;
+  case MODE_BRIGHTLESS:
+  {
+    digitalWrite(LED_BRIGHT, 0);
+    digitalWrite(LED_SPEED, 1);
+    digitalWrite(LED_PROGRAMM, 1);
+  }
+  break;
+  case MODE_SPEED:
+  {
+    digitalWrite(LED_SPEED, 0);
+    digitalWrite(LED_BRIGHT, 1);
+    digitalWrite(LED_PROGRAMM, 1);
+  }
+  break;
+  }
+  if (mode != MODE_DEFAULT)
+  {
+    if (submode == SUBMODE_ALL)
+    {
+      digitalWrite(LED_MODE, 0);
+    }
+    if (submode == SUBMODE_STRIPE)
+    {
+      if (strobe == 50)
+        digitalWrite(LED_MODE, 0);
+      if (strobe > 100)
+      {
+        digitalWrite(LED_MODE, 1);
+        strobe = 0;
+      }
+    }
+    if (submode == SUBMODE_STAR)
+    {
+      if (strobe == 50)
+        digitalWrite(LED_MODE, 0);
+      if (strobe > 55)
+      {
+        digitalWrite(LED_MODE, 1);
+        strobe = 0;
+      }
+    }
+  }
+  strobe++;
+}
+//....................................................................................
+//....................................................................................
+extern "C" void __vector_13 (void) __attribute__ ((signal, used, externally_visible)) ; void __vector_13 (void)
 {
   int value = analogRead(BUTTONS_ADC_PIN);
   calcButton(value);
@@ -436,476 +919,4 @@ ISR(TIMER1_OVF_vect)
       }
     }
   }
-  strobe++;
-  switch (mode)
-  {
-  case MODE_DEFAULT:
-    break;
-  case MODE_STRIPE:
-  {
-    digitalWrite(LED_PROGRAMM, 1);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_SPEED, 1);
-  }
-  break;
-  case MODE_PROGRAMM:
-  {
-    digitalWrite(LED_PROGRAMM, 0);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_SPEED, 1);
-  }
-  break;
-  case MODE_BRIGHTLESS:
-  {
-    digitalWrite(LED_BRIGHT, 0);
-    digitalWrite(LED_SPEED, 1);
-    digitalWrite(LED_PROGRAMM, 1);
-  }
-  break;
-  case MODE_SPEED:
-  {
-    digitalWrite(LED_SPEED, 0);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_PROGRAMM, 1);
-  }
-  break;
-  }
-  if (mode == MODE_DEFAULT)
-  {
-    digitalWrite(LED_BLUE, 1);
-    digitalWrite(LED_PROGRAMM, 1);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_SPEED, 1);
-  }
-  else
-  {
-    if (submode == SUBMODE_ALL)
-    {
-      digitalWrite(LED_MODE, 0);
-    }
-    if (submode == SUBMODE_STRIPE)
-    {
-      if (strobe == 50)
-      {
-        digitalWrite(LED_MODE, 0);
-      }
-      else if (strobe == 100)
-      {
-        digitalWrite(LED_MODE, 1);
-        strobe = 0;
-      }
-    }
-    if (submode == SUBMODE_STAR)
-    {
-      if (strobe == 50)
-      {
-        digitalWrite(LED_MODE, 0);
-        strobe = 0;
-      }
-      else
-        digitalWrite(LED_MODE, 1);
-    }
-  }
 }
-//....................................................................................
-//....................................................................................
-void setup()
-{
-  firststart = eeprom_read_byte((uint8_t *)0x00);
-  if (firststart != 13)
-  {
-    eeprom_write_byte((uint8_t *)0x00, 13);
-    eeprom_write_byte((uint8_t *)0x01, progStripe);
-    eeprom_write_byte((uint8_t *)0x02, progStar);
-    eeprom_write_byte((uint8_t *)0x03, brightStripe);
-    eeprom_write_byte((uint8_t *)0x04, brightStar);
-    eeprom_write_byte((uint8_t *)0x05, speedStripe/100);
-    eeprom_write_byte((uint8_t *)0x06, speedStar/100);
-  }
-  else
-  {
-    progStripe = eeprom_read_byte((uint8_t *)0x01);
-    progStar = eeprom_read_byte((uint8_t *)0x02);
-    brightStripe = eeprom_read_byte((uint8_t *)0x03);
-    brightStar = eeprom_read_byte((uint8_t *)0x04);
-    speedStripe = eeprom_read_byte((uint8_t *)0x05)*100;
-    speedStar = eeprom_read_byte((uint8_t *)0x06)*100;
-  }
-  Serial.begin(9600);
-  pinMode(LED_MODE, OUTPUT);
-  pinMode(LED_BRIGHT, OUTPUT);
-  pinMode(LED_PROGRAMM, OUTPUT);
-  pinMode(LED_SPEED, OUTPUT);
-  setupInterrupt();
-#ifdef ONE_STRIPE
-  setupStripe(stripe, 100);
-#endif
-#ifdef FOUR_STRIPES
-  stripe[0] = stripe1;
-  stripe[1] = stripe2;
-  stripe[2] = stripe3;
-  stripe[3] = stripe4;
-  for (int i = 0; i < 4; i++)
-    setupStripe(stripe[i], 50);
-#endif
-  setupStripe(star, 50);
-}
-//....................................................................................
-//....................................................................................
-void loop()
-{
-  // Serial.println(speedStripe);
-#ifdef ONE_STRIPE
-  stripe.setBrightness(brightStripe);
-#endif
-#ifdef FOUR_STRIPES
-  for (int i = 0; i < 4; i++)
-    stripe[i].setBrightness(brightStripe);
-#endif
-  star.setBrightness(brightStar);
-  if (speedStripe - 1 <= progCountStripe)
-  {
-#ifdef ONE_STRIPE
-    statefunction(stripe, progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
-#endif
-#ifdef FOUR_STRIPES
-    statefunction4stripes(progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
-#endif
-    progCountStripe = 0;
-  }
-  if (speedStar - 1 <= progCountStar)
-  {
-    if (progStar == 4 && progStripe == 4)
-    {
-#ifdef ONE_STRIPE
-      if (roundcountStripe == stripe.numPixels())
-        sync = true;
-#endif
-#ifdef FOUR_STRIPES
-      if (roundcountStripe == stripe[0].numPixels())
-        sync = true;
-#endif
-      if (sync == true)
-      {
-        statefunction(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
-      }
-      if (roundcountStar == star.numPixels() + 1)
-      {
-        star.clear();
-        star.show();
-        sync = false;
-      }
-    }
-    else
-      statefunction(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
-    progCountStar = 0;
-  }
-  progCountStar++;
-  progCountStripe++;
-  if (save == true)
-  {
-
-    eeprom_write_byte((uint8_t *)0x00, 13);
-    eeprom_write_byte((uint8_t *)0x01, progStripe);
-    eeprom_write_byte((uint8_t *)0x02, progStar);
-    eeprom_write_byte((uint8_t *)0x03, brightStripe);
-    eeprom_write_byte((uint8_t *)0x04, brightStar);
-    eeprom_write_byte((uint8_t *)0x05, speedStripe/100);
-    eeprom_write_byte((uint8_t *)0x06, speedStar/100);
-    cli();
-    digitalWrite(LED_MODE, 0);
-    digitalWrite(LED_PROGRAMM, 0);
-    digitalWrite(LED_BRIGHT, 0);
-    digitalWrite(LED_SPEED, 0);
-    _delay_ms(1000);
-    digitalWrite(LED_MODE, 1);
-    digitalWrite(LED_PROGRAMM, 1);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_SPEED, 1);
-    save = false;
-    sei();
-  }
-}
-//....................................................................................
-//....................................................................................
-void setupInterrupt(void)
-{
-  cli();
-  TCCR1A = 0;
-  TCCR1B = 0;
-  TCCR2A = 0;
-
-  // Подключение прерывания по переполнению Timer2
-  TIMSK2 = 1 << TOIE2;
-
-  // Подключение прерывания по переполнению Timer1
-  TIMSK1 = (1 << TOIE1);
-  // Установить таймер на тактовой частоте:
-  TCCR1B |= (1 << CS10);
-  TCCR2B |= (1 << CS20);
-  sei();
-}
-//....................................................................................
-//....................................................................................
-void setupStripe(Adafruit_NeoPixel &strip, uint8_t brightness)
-{
-  strip.begin();
-  strip.show();
-  strip.setBrightness(brightness);
-}
-//....................................................................................
-//....................................................................................
-void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, char sp)
-{
-  uint32_t colRand = strip.gamma32(strip.ColorHSV((uint16_t)random()));
-  uint8_t num = random();
-  switch (programma)
-  {
-
-  case 1: // RANDOM CLEAR
-  {
-    // int k = millis();
-    while (num > strip.numPixels())
-    {
-      num = random();
-    }
-    strip.setPixelColor(num, colRand);
-    strip.show();
-    strip.clear();
-  }
-  break;
-
-  case 2: // RANDOM NON CLEAR
-  {
-    num = random(strip.numPixels());
-    strip.setPixelColor(num, colRand);
-    strip.show();
-  }
-  break;
-
-  case 3: // RAINBOW
-  {
-    for (int b = 0; b < 3; b++)
-    {
-      for (uint16_t c = b; c < strip.numPixels(); c += 3)
-      {
-        uint16_t hue = firstPixelHue + c * 65536L / strip.numPixels();
-        uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
-        strip.setPixelColor(c, color);                       // Set pixel 'c' to value 'color'
-      }
-      strip.show();                      // Update strip with new contents
-      firstPixelHue += 65536 / sp; // One cycle of color wheel over 90 frames
-    }
-  }
-  break;
-
-  case 4: // ROUNDPIXEL
-  {
-    if (roundcount > strip.numPixels())
-    {
-      roundcount = 0;
-    }
-    strip.setPixelColor(roundcount, colRand);
-    strip.setPixelColor(roundcount - 1, strip.Color(0, 0, 0));
-    strip.show();
-    roundcount++;
-  }
-  break;
-  case 5: // SMALL SNOW
-  {
-    for (int i = 0; i < 5; i++)
-    {
-      uint8_t snows = random(100);
-      num = random(strip.numPixels());
-      strip.setPixelColor(num, strip.Color(snows, snows, snows));
-    }
-    strip.show();
-    strip.clear();
-  }
-  break;
-  case 6: // SNOW STORM
-  {
-    for (int b = 0; b < 3; b++)
-    {
-      for (uint16_t c = b; c < strip.numPixels(); c += 3)
-      {
-        uint8_t hue = random(100);
-        uint32_t color = strip.Color(hue, hue, hue); // hue -> RGB
-        strip.setPixelColor(c, color);               // Set pixel 'c' to value 'color'
-      }
-      strip.show();
-    }
-  }
-  break;
-#ifdef FOUR_STRIPES
-  case 7: // RAINBOW PER 1 SITE
-  {
-    for (int a = 0; a < 5; a++)
-    {
-      uint16_t hue = firstPixelHue;
-      uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
-      strip.setPixelColor(a, color);
-    }
-    for (int a = 5; a < 10; a++)
-    {
-      uint16_t hue = firstPixelHue + 65536 / 2;
-      uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
-      strip.setPixelColor(a, color);
-    }
-    strip.show();
-    firstPixelHue += 65536 / sp;
-  }
-  break;
-#endif
-  default:
-  {
-    if (programma > 6)
-      programma = 1;
-    if (programma == 0)
-      programma = 6;
-  }
-  break;
-  }
-}
-#ifdef FOUR_STRIPES
-void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, char sp)
-{
-  uint32_t colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
-  uint8_t num = random();
-  switch (programma)
-  {
-
-  case 1: // RANDOM CLEAR
-  {
-    // int k = millis();
-    while (num > stripe[0].numPixels())
-    {
-      num = random();
-    }
-    for (int i = 0; i < 4; i++)
-    {
-      stripe[i].setPixelColor(num, colRand);
-      stripe[i].show();
-      stripe[i].clear();
-    }
-  }
-  break;
-
-  case 2: // RANDOM NON CLEAR
-  {
-    num = random(stripe[0].numPixels());
-    for (int i = 0; i < 4; i++)
-    {
-      stripe[i].setPixelColor(num, colRand);
-      stripe[i].show();
-    }
-  }
-  break;
-
-  case 3: // RAINBOW
-  {
-    for (int b = 0; b < 3; b++)
-    {
-      for (uint16_t c = b; c < stripe[0].numPixels(); c += 3)
-      {
-        uint16_t hue = firstPixelHue + c * 65536L / stripe[0].numPixels();
-        uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
-        for (int i = 0; i < 4; i++)
-          stripe[i].setPixelColor(c, color); // Set pixel 'c' to value 'color'
-      }
-      for (int i = 0; i < 4; i++)
-        stripe[i].show();                // Update strip with new contents
-      firstPixelHue += 65536 / sp; // One cycle of color wheel over 90 frames
-    }
-  }
-  break;
-
-  case 4: // ROUNDPIXEL
-  {
-    if (roundcount > stripe[0].numPixels() + 1)
-    {
-      roundcount = 0;
-    }
-
-    for (int i = 0; i < 4; i++)
-    {
-      stripe[i].setPixelColor(roundcount, colRand);
-      stripe[i].setPixelColor(roundcount - 1, stripe[i].Color(0, 0, 0));
-      stripe[i].show();
-    }
-    roundcount++;
-  }
-  break;
-  case 5: // SMALL SNOW
-  {
-    for (int i = 0; i < 5; i++)
-    {
-      uint8_t snows = random(100);
-      uint32_t color = stripe[0].Color(snows, snows, snows);
-      num = random(stripe[0].numPixels());
-      for (int i = 0; i < 4; i++)
-        stripe[i].setPixelColor(num, color);
-    }
-    for (int i = 0; i < 4; i++)
-    {
-      stripe[i].show();
-      stripe[i].clear();
-    }
-  }
-  break;
-  case 6: // SNOW STORM
-  {
-    for (int b = 0; b < 3; b++)
-    {
-      for (uint16_t c = b; c < stripe[0].numPixels(); c += 3)
-      {
-        uint8_t hue = random(100);
-        uint32_t color = stripe[0].Color(hue, hue, hue); // hue -> RGB
-        for (int i = 0; i < 4; i++)
-          stripe[i].setPixelColor(c, color); // Set pixel 'c' to value 'color'
-      }
-      for (int i = 0; i < 4; i++)
-        stripe[i].show();
-    }
-  }
-  break;
-  case 7: // RAINBOW PER 1 SITE
-  {
-    for (int i = 0; i < 4; i++)
-    {
-      for (int a = 0; a < LED_STRIPE_BOTTOM; a++)
-      {
-        uint16_t hue = firstPixelHue + 65536 / 4;
-        uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
-        stripe[i].setPixelColor(a, color);
-      }
-      for (int a = LED_STRIPE_BOTTOM; a < LED_STRIPE_BETWEEN; a++)
-      {
-        uint16_t hue = firstPixelHue + 65536 / 4 + 65536 / 4;
-        uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
-        stripe[i].setPixelColor(a, color);
-      }
-      for (int a = LED_STRIPE_BETWEEN; a < LED_STRIPE_UP; a++)
-      {
-        uint16_t hue = firstPixelHue + 65536 / 4 + 65536 / 4 + 65536 / 4;
-        uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
-        stripe[i].setPixelColor(a, color);
-      }
-      stripe[i].show();
-      firstPixelHue += 65536 / 4;
-    }
-    firstPixelHue += 65536 / sp;
-  }
-  break;
-  default:
-  {
-    if (programma > 7)
-      programma = 1;
-    if (programma == 0)
-      programma = 7;
-  }
-  break;
-  }
-}
-#endif
-
