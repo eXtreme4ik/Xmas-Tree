@@ -28,7 +28,7 @@
 Скетч ардуино лежит в папке xmastree  
 До компиляции выбрать плату Arduino Pro Mini и выбрать микроконтроллер Atmega168 5V 16Mhz  
 
-Для Platformio:
+Для PlatformIO:
 ---------------
 Создать новый проект  
 Выбрать плату Arduino Pro Mini Atmega168 5V 16Mhz и фреймворк Arduino  
