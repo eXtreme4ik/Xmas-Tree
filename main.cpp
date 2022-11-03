@@ -17,35 +17,34 @@
 
 //--------------------------HARDWARE PRESETS--------------------------\/
 
-#define LED_TOTAL 82 // Общее количество светодиодов в Ёлке
-//#define LED_STAR 8   // Количество светодиодов звезды (с обоих сторон последовательно) (TEST)
-#define LED_STAR 10     // Количество светодиодов звезды (с обоих сторон последовательно)
-#define LED_STRIPE_UP 18
-#define LED_STRIPE_BOTTOM 8
-#define LED_STRIPE_BETWEEN 14
-// #define LED_4STRIPE 16 // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок (TEST)
-#define LED_4STRIPE 18  // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок
-// #define LED_1STRIPE 32 // Количество светодиодов в одной полоске (4 полоски последовательно) (TEST)
-#define LED_1STRIPE 72  // Количество светодиодов в одной полоске (4 полоски последовательно)
+#define LED_TOTAL 82            // Общее количество светодиодов в Ёлке
+// #define LED_STAR 8              // Количество светодиодов звезды (с обоих сторон последовательно) (TEST)
+#define LED_STAR 10             // Количество светодиодов звезды (с обоих сторон последовательно)
+// #define LED_4STRIPE 16          // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок (TEST)
+#define LED_4STRIPE 18          // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок
+// #define LED_1STRIPE 32           // Количество светодиодов в одной полоске (4 полоски последовательно) (TEST)
+#define LED_1STRIPE 72          // Количество светодиодов в одной полоске (4 полоски последовательно)
+
 #ifdef ONE_STRIPE
-#define STRIPE_PIN 5 // Пин ленты
+#define STRIPE_PIN 5            // Пин ленты
 #endif
+
 #ifdef FOUR_STRIPES
-#define STRIPE0_PIN 5 // Пин ленты
-#define STRIPE1_PIN 6 // Пин второй ленты
-#define STRIPE2_PIN 7 // Пин третьей ленты
-#define STRIPE3_PIN 8 // Пин четвертой ленты
+#define STRIPE0_PIN 5           // Пин ленты
+#define STRIPE1_PIN 6           // Пин второй ленты
+#define STRIPE2_PIN 7           // Пин третьей ленты
+#define STRIPE3_PIN 8           // Пин четвертой ленты
+#define LED_STRIPE_UP 18        // Макс значение для верхнего уровня
+#define LED_STRIPE_BOTTOM 8     // Макс значение для нижнего уровня
+#define LED_STRIPE_BETWEEN 14   // Макс значение для среднего уровня
 #endif
-#define STAR_PIN 9         // Пин ленты звезды
-#define BUTTONS_ADC_PIN 14 // Пин кнопок
-#define SW1 1              // Кнопки
-#define SW2 2
-#define SW3 3
-#define SW4 4
-#define LED_BLUE 15
-#define LED_GREEN 16
-#define LED_RED 17
-#define LED_YELLOW 18
+
+#define STAR_PIN 9              // Пин ленты звезды
+#define BUTTONS_ADC_PIN 14      // Пин кнопок
+#define LED_BLUE 15             //Пин синего светодиода
+#define LED_GREEN 16            //Пин зеленого светодиода
+#define LED_RED 17              //Пин красного светодиода
+#define LED_YELLOW 18           //Пин желтого светодиода
 
 //--------------------------SOFTWARE PRESETS--------------------------\/
 
@@ -89,11 +88,10 @@
     else                         \
       x = 0;                     \
   } while (0)
-
-// 1 is between 1.6-1.8V (VCC=5V) ~SW1
-// 2 is between 2.4-2.6V (VCC=5V) ~SW2
-// 3 is between 3.2-3.4V (VCC=5V) ~SW3
-// 4 is between 2.9-3.1V (VCC=5V) ~SW4
+#define SW1 1     // 1 is between 1.6-1.8V (VCC=5V) ~SW1
+#define SW2 2     // 2 is between 2.4-2.6V (VCC=5V) ~SW2
+#define SW3 3     // 3 is between 3.2-3.4V (VCC=5V) ~SW3
+#define SW4 4     // 4 is between 2.9-3.1V (VCC=5V) ~SW4
 
 //-----------------------------PRESETS FOR MACRO---------------------\/
 
@@ -152,7 +150,7 @@ void setupStripe(Adafruit_NeoPixel &strip, uint8_t brightness);
     @param  sp Параметр скорости Rainbow
     @return  void
   */
-void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, char sp);
+void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
 #ifdef FOUR_STRIPES
 /*!
     @brief  Функция вызова цикла программы для 4-х строк
@@ -162,7 +160,7 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
     @param  sp Параметр скорости Rainbow
     @return  void
   */
-void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, char sp);
+void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
 #endif
 
 //----------------------------VARIABLES-----------------------\/
@@ -198,314 +196,6 @@ bool md = false;     // Флаг нажатия кнопки Режим
 bool flag = false;   // Флаг нажатия любой из кнопок
 bool sync = false;   // Флаг синхронизации программы звезды и ёлки
 //....................................................................................
-//....................................................................................
-//....................................................................................
-ISR(TIMER2_OVF_vect)
-{
-  switch (mode)
-  {
-  case MODE_DEFAULT:
-  {
-    digitalWrite(LED_MODE, 1);
-    digitalWrite(LED_PROGRAMM, 1);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_SPEED, 1);
-  }
-  break;
-  case MODE_STRIPE:
-  {
-    digitalWrite(LED_PROGRAMM, 1);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_SPEED, 1);
-  }
-  break;
-  case MODE_PROGRAMM:
-  {
-    digitalWrite(LED_PROGRAMM, 0);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_SPEED, 1);
-  }
-  break;
-  case MODE_BRIGHTLESS:
-  {
-    digitalWrite(LED_BRIGHT, 0);
-    digitalWrite(LED_SPEED, 1);
-    digitalWrite(LED_PROGRAMM, 1);
-  }
-  break;
-  case MODE_SPEED:
-  {
-    digitalWrite(LED_SPEED, 0);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_PROGRAMM, 1);
-  }
-  break;
-  }
-  if (mode != MODE_DEFAULT)
-  {
-    if (submode == SUBMODE_ALL)
-    {
-      digitalWrite(LED_MODE, 0);
-    }
-    if (submode == SUBMODE_STRIPE)
-    {
-      if (strobe == 50)
-        digitalWrite(LED_MODE, 0);
-      if (strobe > 100)
-      {
-        digitalWrite(LED_MODE, 1);
-        strobe = 0;
-      }
-    }
-    if (submode == SUBMODE_STAR)
-    {
-      if (strobe == 50)
-        digitalWrite(LED_MODE, 0);
-      if (strobe > 55)
-      {
-        digitalWrite(LED_MODE, 1);
-        strobe = 0;
-      }
-    }
-  }
-  strobe++;
-}
-//....................................................................................
-//....................................................................................
-ISR(TIMER1_OVF_vect)
-{
-  int value = analogRead(BUTTONS_ADC_PIN);
-  calcButton(value);
-  if (timeButton)
-    timeButton--;
-  if (value && !timeButton)
-  {
-    if (value == BUTTON_HIDDEN)
-    {
-      timeButton = 100;
-      flag = true;
-    }
-    if (value == BUTTON_UP)
-    {
-      up = true;
-      flag = true;
-      timeButton = 100;
-    }
-    if (value == BUTTON_DOWN)
-    {
-      dn = true;
-      flag = true;
-      timeButton = 100;
-    }
-    if (value == BUTTON_MODE)
-    {
-      md = true;
-      flag = true;
-      timeButton = 100;
-    }
-
-    if (md)
-    {
-      if (mode < MAXMODES - 1)
-        mode++;
-      else
-        mode = 0;
-      md = false;
-    }
-    if (mode == MODE_DEFAULT)
-    {
-      if (value == BUTTON_HIDDEN)
-        save = true;
-      up = false;
-      dn = false;
-    }
-    if (mode == MODE_STRIPE)
-    {
-      if (up)
-      {
-        submode += 1;
-        up = false;
-      }
-      if (dn)
-      {
-        submode -= 1;
-        dn = false;
-      }
-      if (submode > 2)
-        submode = 0;
-      if (submode < 0)
-        submode = 2;
-    }
-    if (mode == MODE_PROGRAMM)
-    {
-      if (submode == SUBMODE_STRIPE)
-      {
-        if (up)
-        {
-          progStripe += 1;
-          up = false;
-        }
-        if (dn)
-        {
-          progStripe -= 1;
-          dn = false;
-        }
-      }
-      if (submode == SUBMODE_STAR)
-      {
-        if (up)
-        {
-          progStar += 1;
-          up = false;
-        }
-        if (dn)
-        {
-          progStar -= 1;
-          dn = false;
-        }
-      }
-      if (submode == SUBMODE_ALL)
-      {
-        if (up)
-        {
-          progStar += 1;
-          progStripe = progStar;
-          up = false;
-        }
-        if (dn)
-        {
-          progStar -= 1;
-          progStripe = progStar;
-          dn = false;
-        }
-      }
-    }
-    if (mode == MODE_BRIGHTLESS)
-    {
-      if (submode == SUBMODE_STRIPE)
-      {
-        if (up)
-        {
-          brightStripe += BRIGHT_STEP;
-          up = false;
-        }
-        if (dn)
-        {
-          brightStripe -= BRIGHT_STEP;
-          dn = false;
-        }
-        if (brightStripe < 1)
-          brightStripe = 1;
-        if (brightStripe > BRIGHT_MAX)
-          brightStripe = BRIGHT_MAX;
-      }
-      if (submode == SUBMODE_STAR)
-      {
-        if (up)
-        {
-          brightStar += BRIGHT_STEP;
-          up = false;
-        }
-        if (dn)
-        {
-          brightStar -= BRIGHT_STEP;
-          dn = false;
-        }
-        if (brightStar < 1)
-          brightStar = 1;
-        if (brightStar > BRIGHT_MAX)
-          brightStar = BRIGHT_MAX;
-      }
-      if (submode == SUBMODE_ALL)
-      {
-        if (up)
-        {
-          brightStripe += BRIGHT_STEP;
-          brightStar = brightStripe;
-          up = false;
-        }
-        if (dn)
-        {
-          brightStripe -= BRIGHT_STEP;
-          brightStar = brightStripe;
-          dn = false;
-        }
-        if (brightStripe < 1)
-        {
-          brightStripe = 1;
-          brightStar = brightStripe;
-        }
-        if (brightStripe > BRIGHT_MAX)
-        {
-          brightStripe = BRIGHT_MAX;
-          brightStar = brightStripe;
-        }
-      }
-    }
-    if (mode == MODE_SPEED)
-    {
-      if (submode == SUBMODE_STRIPE)
-      {
-        if (up)
-        {
-          speedStripe -= SPEED_STEP;
-          up = false;
-        }
-        if (dn)
-        {
-          speedStripe += SPEED_STEP;
-          dn = false;
-        }
-        if (speedStripe < SPEED_MIN)
-          speedStripe = SPEED_MIN;
-        if (speedStripe > SPEED_MAX)
-          speedStripe = SPEED_MAX;
-      }
-      if (submode == SUBMODE_STAR)
-      {
-        if (up)
-        {
-          speedStar -= SPEED_STEP;
-          up = false;
-        }
-        if (dn)
-        {
-          speedStar += SPEED_STEP;
-          dn = false;
-        }
-        if (speedStar < SPEED_MIN)
-          speedStar = SPEED_MIN;
-        if (speedStar > SPEED_MAX)
-          speedStar = SPEED_MAX;
-      }
-      if (submode == SUBMODE_ALL)
-      {
-        if (up)
-        {
-          speedStripe -= SPEED_STEP;
-          speedStar = speedStripe;
-          up = false;
-        }
-        if (dn)
-        {
-          speedStripe += SPEED_STEP;
-          speedStar = speedStripe;
-          dn = false;
-        }
-        if (speedStripe < SPEED_MIN)
-        {
-          speedStripe = SPEED_MIN;
-          speedStar = speedStripe;
-        }
-        if (speedStripe > SPEED_MAX)
-        {
-          speedStripe = SPEED_MAX;
-          speedStar = speedStripe;
-        }
-      }
-    }
-  }
-}
 //....................................................................................
 //....................................................................................
 void setup()
@@ -924,4 +614,309 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
   }
 }
 #endif
+extern "C" void __vector_9 (void) __attribute__ ((signal, used, externally_visible)) ; void __vector_9 (void)
+{
+  switch (mode)
+  {
+  case MODE_DEFAULT:
+  {
+    digitalWrite(LED_MODE, 1);
+    digitalWrite(LED_PROGRAMM, 1);
+    digitalWrite(LED_BRIGHT, 1);
+    digitalWrite(LED_SPEED, 1);
+  }
+  break;
+  case MODE_STRIPE:
+  {
+    digitalWrite(LED_PROGRAMM, 1);
+    digitalWrite(LED_BRIGHT, 1);
+    digitalWrite(LED_SPEED, 1);
+  }
+  break;
+  case MODE_PROGRAMM:
+  {
+    digitalWrite(LED_PROGRAMM, 0);
+    digitalWrite(LED_BRIGHT, 1);
+    digitalWrite(LED_SPEED, 1);
+  }
+  break;
+  case MODE_BRIGHTLESS:
+  {
+    digitalWrite(LED_BRIGHT, 0);
+    digitalWrite(LED_SPEED, 1);
+    digitalWrite(LED_PROGRAMM, 1);
+  }
+  break;
+  case MODE_SPEED:
+  {
+    digitalWrite(LED_SPEED, 0);
+    digitalWrite(LED_BRIGHT, 1);
+    digitalWrite(LED_PROGRAMM, 1);
+  }
+  break;
+  }
+  if (mode != MODE_DEFAULT)
+  {
+    if (submode == SUBMODE_ALL)
+    {
+      digitalWrite(LED_MODE, 0);
+    }
+    if (submode == SUBMODE_STRIPE)
+    {
+      if (strobe == 50)
+        digitalWrite(LED_MODE, 0);
+      if (strobe > 100)
+      {
+        digitalWrite(LED_MODE, 1);
+        strobe = 0;
+      }
+    }
+    if (submode == SUBMODE_STAR)
+    {
+      if (strobe == 50)
+        digitalWrite(LED_MODE, 0);
+      if (strobe > 55)
+      {
+        digitalWrite(LED_MODE, 1);
+        strobe = 0;
+      }
+    }
+  }
+  strobe++;
+}
+//....................................................................................
+//....................................................................................
+extern "C" void __vector_13 (void) __attribute__ ((signal, used, externally_visible)) ; void __vector_13 (void)
+{
+  int value = analogRead(BUTTONS_ADC_PIN);
+  calcButton(value);
+  if (timeButton)
+    timeButton--;
+  if (value && !timeButton)
+  {
+    if (value == BUTTON_HIDDEN)
+    {
+      timeButton = 100;
+      flag = true;
+    }
+    if (value == BUTTON_UP)
+    {
+      up = true;
+      flag = true;
+      timeButton = 100;
+    }
+    if (value == BUTTON_DOWN)
+    {
+      dn = true;
+      flag = true;
+      timeButton = 100;
+    }
+    if (value == BUTTON_MODE)
+    {
+      md = true;
+      flag = true;
+      timeButton = 100;
+    }
 
+    if (md)
+    {
+      if (mode < MAXMODES - 1)
+        mode++;
+      else
+        mode = 0;
+      md = false;
+    }
+    if (mode == MODE_DEFAULT)
+    {
+      if (value == BUTTON_HIDDEN)
+        save = true;
+      up = false;
+      dn = false;
+    }
+    if (mode == MODE_STRIPE)
+    {
+      if (up)
+      {
+        submode += 1;
+        up = false;
+      }
+      if (dn)
+      {
+        submode -= 1;
+        dn = false;
+      }
+      if (submode > 2)
+        submode = 0;
+      if (submode < 0)
+        submode = 2;
+    }
+    if (mode == MODE_PROGRAMM)
+    {
+      if (submode == SUBMODE_STRIPE)
+      {
+        if (up)
+        {
+          progStripe += 1;
+          up = false;
+        }
+        if (dn)
+        {
+          progStripe -= 1;
+          dn = false;
+        }
+      }
+      if (submode == SUBMODE_STAR)
+      {
+        if (up)
+        {
+          progStar += 1;
+          up = false;
+        }
+        if (dn)
+        {
+          progStar -= 1;
+          dn = false;
+        }
+      }
+      if (submode == SUBMODE_ALL)
+      {
+        if (up)
+        {
+          progStar += 1;
+          progStripe = progStar;
+          up = false;
+        }
+        if (dn)
+        {
+          progStar -= 1;
+          progStripe = progStar;
+          dn = false;
+        }
+      }
+    }
+    if (mode == MODE_BRIGHTLESS)
+    {
+      if (submode == SUBMODE_STRIPE)
+      {
+        if (up)
+        {
+          brightStripe += BRIGHT_STEP;
+          up = false;
+        }
+        if (dn)
+        {
+          brightStripe -= BRIGHT_STEP;
+          dn = false;
+        }
+        if (brightStripe < 1)
+          brightStripe = 1;
+        if (brightStripe > BRIGHT_MAX)
+          brightStripe = BRIGHT_MAX;
+      }
+      if (submode == SUBMODE_STAR)
+      {
+        if (up)
+        {
+          brightStar += BRIGHT_STEP;
+          up = false;
+        }
+        if (dn)
+        {
+          brightStar -= BRIGHT_STEP;
+          dn = false;
+        }
+        if (brightStar < 1)
+          brightStar = 1;
+        if (brightStar > BRIGHT_MAX)
+          brightStar = BRIGHT_MAX;
+      }
+      if (submode == SUBMODE_ALL)
+      {
+        if (up)
+        {
+          brightStripe += BRIGHT_STEP;
+          brightStar = brightStripe;
+          up = false;
+        }
+        if (dn)
+        {
+          brightStripe -= BRIGHT_STEP;
+          brightStar = brightStripe;
+          dn = false;
+        }
+        if (brightStripe < 1)
+        {
+          brightStripe = 1;
+          brightStar = brightStripe;
+        }
+        if (brightStripe > BRIGHT_MAX)
+        {
+          brightStripe = BRIGHT_MAX;
+          brightStar = brightStripe;
+        }
+      }
+    }
+    if (mode == MODE_SPEED)
+    {
+      if (submode == SUBMODE_STRIPE)
+      {
+        if (up)
+        {
+          speedStripe -= SPEED_STEP;
+          up = false;
+        }
+        if (dn)
+        {
+          speedStripe += SPEED_STEP;
+          dn = false;
+        }
+        if (speedStripe < SPEED_MIN)
+          speedStripe = SPEED_MIN;
+        if (speedStripe > SPEED_MAX)
+          speedStripe = SPEED_MAX;
+      }
+      if (submode == SUBMODE_STAR)
+      {
+        if (up)
+        {
+          speedStar -= SPEED_STEP;
+          up = false;
+        }
+        if (dn)
+        {
+          speedStar += SPEED_STEP;
+          dn = false;
+        }
+        if (speedStar < SPEED_MIN)
+          speedStar = SPEED_MIN;
+        if (speedStar > SPEED_MAX)
+          speedStar = SPEED_MAX;
+      }
+      if (submode == SUBMODE_ALL)
+      {
+        if (up)
+        {
+          speedStripe -= SPEED_STEP;
+          speedStar = speedStripe;
+          up = false;
+        }
+        if (dn)
+        {
+          speedStripe += SPEED_STEP;
+          speedStar = speedStripe;
+          dn = false;
+        }
+        if (speedStripe < SPEED_MIN)
+        {
+          speedStripe = SPEED_MIN;
+          speedStar = speedStripe;
+        }
+        if (speedStripe > SPEED_MAX)
+        {
+          speedStripe = SPEED_MAX;
+          speedStar = speedStripe;
+        }
+      }
+    }
+  }
+}
