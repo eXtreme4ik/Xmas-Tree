@@ -42,5 +42,6 @@
 low_fuses=0xff  
 high_fuses=0xdd  
 extended_fuses=0xF8  
+ПРОШИВКА СОДЕРЖИТ АРДУИНОВСКИЙ ЗАГРУЗЧИК!
 
 
