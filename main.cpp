@@ -172,10 +172,10 @@ uint16_t roundcountStripe = 0;
 int firstPixelHueStar = 0;
 uint16_t roundcountStar = 0;
 //----------------------------COUNTERS-----------------------\/
-int timeButton = 0;      // Каунтер для нажатия кнопок
-int strobe = 0;          // Каунтер для статусных светодиодов
-int progCountStripe = 0; // Каунтер для программ Ёлки
-int progCountStar = 0;   // Каунтер для программ Звезды
+char timeButton = 0;      // Каунтер для нажатия кнопок
+char strobe = 0;          // Каунтер для статусных светодиодов
+unsigned int progCountStripe = 0; // Каунтер для программ Ёлки
+unsigned int progCountStar = 0;   // Каунтер для программ Звезды
 //----------------------------MODES-----------------------\/
 int mode = 0;
 int submode = 0;
