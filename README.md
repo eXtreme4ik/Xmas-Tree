@@ -40,8 +40,7 @@
 Использовать файл скомпилированной прошивки firmware.hex  
 Фьюзы:  
 low_fuses=0xff  
-high_fuses=0xdd  
-extended_fuses=0xF8  
-ПРОШИВКА СОДЕРЖИТ АРДУИНОВСКИЙ ЗАГРУЗЧИК!
+high_fuses=0xd5  
+extended_fuses=0xf8  
 
 
