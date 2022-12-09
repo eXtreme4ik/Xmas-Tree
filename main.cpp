@@ -17,60 +17,60 @@
 
 //--------------------------HARDWARE PRESETS--------------------------\/
 
-#define LED_TOTAL 82            // Общее количество светодиодов в Ёлке
+#define LED_TOTAL 82 // Общее количество светодиодов в Ёлке
 // #define LED_STAR 8              // Количество светодиодов звезды (с обоих сторон последовательно) (TEST)
-#define LED_STAR 10             // Количество светодиодов звезды (с обоих сторон последовательно)
+#define LED_STAR 10 // Количество светодиодов звезды (с обоих сторон последовательно)
 // #define LED_4STRIPE 16          // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок (TEST)
-#define LED_4STRIPE 18          // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок
+#define LED_4STRIPE 18 // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок
 // #define LED_1STRIPE 32           // Количество светодиодов в одной полоске (4 полоски последовательно) (TEST)
-#define LED_1STRIPE 72          // Количество светодиодов в одной полоске (4 полоски последовательно)
+#define LED_1STRIPE 72 // Количество светодиодов в одной полоске (4 полоски последовательно)
 
 #ifdef ONE_STRIPE
-#define STRIPE_PIN 5            // Пин ленты
+#define STRIPE_PIN 5 // Пин ленты
 #endif
 
 #ifdef FOUR_STRIPES
-#define STRIPE0_PIN 5           // Пин ленты
-#define STRIPE1_PIN 6           // Пин второй ленты
-#define STRIPE2_PIN 7           // Пин третьей ленты
-#define STRIPE3_PIN 8           // Пин четвертой ленты
-#define LED_STRIPE_UP 18        // Макс значение для верхнего уровня
-#define LED_STRIPE_BOTTOM 8     // Макс значение для нижнего уровня
-#define LED_STRIPE_BETWEEN 14   // Макс значение для среднего уровня
+#define STRIPE0_PIN 8         // Пин ленты
+#define STRIPE1_PIN 7         // Пин второй ленты
+#define STRIPE2_PIN 6         // Пин третьей ленты
+#define STRIPE3_PIN 5         // Пин четвертой ленты
+#define LED_STRIPE_UP 18      // Макс значение для верхнего уровня
+#define LED_STRIPE_BOTTOM 8   // Макс значение для нижнего уровня
+#define LED_STRIPE_BETWEEN 14 // Макс значение для среднего уровня
 #endif
 
-#define STAR_PIN 9              // Пин ленты звезды
-#define BUTTONS_ADC_PIN 14      // Пин кнопок
-#define LED_BLUE 15             //Пин синего светодиода
-#define LED_GREEN 16            //Пин зеленого светодиода
-#define LED_RED 17              //Пин красного светодиода
-#define LED_YELLOW 18           //Пин желтого светодиода
+#define STAR_PIN 9         // Пин ленты звезды
+#define BUTTONS_ADC_PIN 14 // Пин кнопок
+#define LED_BLUE 17        // Пин синего светодиода
+#define LED_GREEN 16       // Пин зеленого светодиода
+#define LED_RED 18         // Пин красного светодиода
+#define LED_YELLOW 15      // Пин желтого светодиода
 
 //--------------------------SOFTWARE PRESETS--------------------------\/
 
-#define MODE_DEFAULT 0            // Основной режим (При нажатии + и - одновременно - сохранить параметры)
-#define MODE_STRIPE 1             // Режим выбора группы светодиодов (Все вместе, Звезда, Ёлка)
-#define MODE_PROGRAMM 2           // Режим выбора программы свечения
-#define MODE_BRIGHTLESS 3         // Режим выбора яркости
-#define MODE_SPEED 4              // Режим выбора скорости
-#define MAXMODES 5                // Максимальное количество режимов
+#define MODE_DEFAULT 0    // Основной режим (При нажатии + и - одновременно - сохранить параметры)
+#define MODE_STRIPE 1     // Режим выбора группы светодиодов (Все вместе, Звезда, Ёлка)
+#define MODE_PROGRAMM 2   // Режим выбора программы свечения
+#define MODE_BRIGHTLESS 3 // Режим выбора яркости
+#define MODE_SPEED 4      // Режим выбора скорости
+#define MAXMODES 5        // Максимальное количество режимов
 
-#define SUBMODE_STRIPE 1          // Подрежим - Ёлка
-#define SUBMODE_STAR 2            // Подрежим - Звезда
-#define SUBMODE_ALL 0             // Подрежим - Всё вместе
+#define SUBMODE_STRIPE 1 // Подрежим - Ёлка
+#define SUBMODE_STAR 2   // Подрежим - Звезда
+#define SUBMODE_ALL 0    // Подрежим - Всё вместе
 
-#define LED_MODE LED_BLUE         // Светодиод ответственный за выбор Елки/звезды
-#define LED_PROGRAMM LED_GREEN    // Светодиод ответственный за выбор программы
-#define LED_BRIGHT LED_RED        // Светодиод ответственный за выбор яркости
-#define LED_SPEED LED_YELLOW      // Светодиод ответственный за выбор скорости
+#define LED_MODE LED_BLUE      // Светодиод ответственный за выбор Елки/звезды
+#define LED_PROGRAMM LED_GREEN // Светодиод ответственный за выбор программы
+#define LED_BRIGHT LED_RED     // Светодиод ответственный за выбор яркости
+#define LED_SPEED LED_YELLOW   // Светодиод ответственный за выбор скорости
 
-#define BRIGHT_MAX 255                // Максимально возможная яркость
-#define SPEED_MAX 10000               // Максимально возможное замедление
-#define SPEED_STEP 500                // Шаг изменения замедления
-#define SPEED_MIN 500                 // Минимально возможное замедление (Далее всё сливается в кучу)
-#define CORRECT_SPEED_RAINBOW 10      // Коэффициент коррекции скорости режима rainbow
-#define SPEED_RAINBOW_COEF sp         // Переменная коррекции скорости режима rainbow
-#define BRIGHT_STEP BRIGHT_MAX / 30   // Шаг изменения яркости
+#define BRIGHT_MAX 255              // Максимально возможная яркость
+#define SPEED_MAX 10000             // Максимально возможное замедление
+#define SPEED_STEP 500              // Шаг изменения замедления
+#define SPEED_MIN 500               // Минимально возможное замедление (Далее всё сливается в кучу)
+#define CORRECT_SPEED_RAINBOW 10    // Коэффициент коррекции скорости режима rainbow
+#define SPEED_RAINBOW_COEF sp       // Переменная коррекции скорости режима rainbow
+#define BRIGHT_STEP BRIGHT_MAX / 30 // Шаг изменения яркости
 
 //-----------------------------MACRO FOR ADC CALCULATE----------------\/
 
@@ -88,17 +88,17 @@
     else                         \
       x = 0;                     \
   } while (0)
-#define SW1 1     // 1 is between 1.6-1.8V (VCC=5V) ~SW1
-#define SW2 2     // 2 is between 2.4-2.6V (VCC=5V) ~SW2
-#define SW3 3     // 3 is between 3.2-3.4V (VCC=5V) ~SW3
-#define SW4 4     // 4 is between 2.9-3.1V (VCC=5V) ~SW4
+#define SW1 1 // 1 is between 1.6-1.8V (VCC=5V) ~SW1
+#define SW2 2 // 2 is between 2.4-2.6V (VCC=5V) ~SW2
+#define SW3 3 // 3 is between 3.2-3.4V (VCC=5V) ~SW3
+#define SW4 4 // 4 is between 2.9-3.1V (VCC=5V) ~SW4
 
 //-----------------------------PRESETS FOR MACRO---------------------\/
 
-#define BUTTON_UP SW1       //Выбор значения напряжения для кнопки 1.6-1.8V
-#define BUTTON_DOWN SW3     //Выбор значения напряжения для кнопки 3.2-3.4V
-#define BUTTON_MODE SW2     //Выбор значения напряжения для кнопки 2.4-2.6V
-#define BUTTON_HIDDEN SW4   //Выбор значения напряжения для кнопки 2.9-3.1V
+#define BUTTON_UP SW2          // Выбор значения напряжения для кнопки 1.6-1.8V
+#define BUTTON_DOWN SW1        // Выбор значения напряжения для кнопки 3.2-3.4V
+#define BUTTON_MODE SW3        // Выбор значения напряжения для кнопки 2.4-2.6V
+#define BUTTON_UP_AND_DOWN SW4 // Выбор значения напряжения для кнопки 2.9-3.1V
 
 //----------------------------EXAMPLE FOR MACRO----------------------\/
 //
@@ -130,7 +130,7 @@ Adafruit_NeoPixel star(LED_STAR, STAR_PIN, TYPELED + LEDSPEED);
 
 //----------------------------FUNCTION PROTOTYPES-----------------------\/
 /*!
-    @brief  Функция настройки таймеров TIMER1 и TIMER2 
+    @brief  Функция настройки таймеров TIMER1 и TIMER2
     @return  void
   */
 void setupInterrupt(void);
@@ -143,7 +143,7 @@ void setupInterrupt(void);
 void setupStripe(Adafruit_NeoPixel &strip, uint8_t brightness);
 /*!
     @brief  Функция вызова цикла программы
-    @param  &strip указатель на объект Adafruit_NeoPixel 
+    @param  &strip указатель на объект Adafruit_NeoPixel
     @param  &programma указатель на переменную действующей программы
     @param  &firstPixelHue Последний параметр Hue для первого пикселя режима Rainbow
     @param  &roundcount Каунтер
@@ -163,38 +163,38 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
 void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
 #endif
 
-//----------------------------VARIABLES-----------------------\/
+//----------------------------VARIABLES-----------------------------\/
 
-//----------------------------CYCLE-----------------------\/
+//----------------------------CYCLE---------------------------------\/
 // Переменные для циклически неповторяющихся эффектов
 int firstPixelHueStripe = 0;
 uint16_t roundcountStripe = 0;
 int firstPixelHueStar = 0;
 uint16_t roundcountStar = 0;
-//----------------------------COUNTERS-----------------------\/
-char timeButton = 0;      // Каунтер для нажатия кнопок
-char strobe = 0;          // Каунтер для статусных светодиодов
+//----------------------------COUNTERS------------------------------\/
+char timeButton = 0;              // Каунтер для нажатия кнопок
+char strobe = 0;                  // Каунтер для статусных светодиодов
 unsigned int progCountStripe = 0; // Каунтер для программ Ёлки
 unsigned int progCountStar = 0;   // Каунтер для программ Звезды
-//----------------------------MODES-----------------------\/
-int mode = 0;
-int submode = 0;
+int mode = 0;                     // Каунтер режимов
+int submode = 0;                  // Каунтер подрежима выбора
 //----------------------------SETTINGS (BASE)-----------------------\/
 // БАЗОВЫЕ УСТАНОВКИ ПРИ ПЕРВОМ СТАРТЕ!
-char progStripe = 4;    // Программа Ёлки
-char progStar = 4;      // Программа Звезды
-int brightStripe = 50;  // Яркость Ёлки
-int speedStripe = 1000; // Скорость Ёлки
-int brightStar = 50;    // Яркость Звезды
-int speedStar = 1000;   // Скорость звезды
+char progStripe = 4;             // Программа Ёлки
+char progStar = 4;               // Программа Звезды
+unsigned int brightStripe = 50;  // Яркость Ёлки
+unsigned int speedStripe = 1000; // Скорость Ёлки
+unsigned int brightStar = 50;    // Яркость Звезды
+unsigned int speedStar = 1000;   // Скорость звезды
 // Флаги
 char firststart = 1; // Флаг первого запуска
-bool save = false;   // Флаг сохранения параметров
-bool up = false;     // Флаг нажатия кнопки +
-bool dn = false;     // Флаг нажатия кнопки -
-bool md = false;     // Флаг нажатия кнопки Режим
-bool flag = false;   // Флаг нажатия любой из кнопок
-bool sync = false;   // Флаг синхронизации программы звезды и ёлки
+char testLight = false;
+bool save = false; // Флаг сохранения параметров
+bool up = false;   // Флаг нажатия кнопки +
+bool dn = false;   // Флаг нажатия кнопки -
+bool md = false;   // Флаг нажатия кнопки Режим
+bool flag = false; // Флаг нажатия любой из кнопок
+bool sync = false; // Флаг синхронизации программы звезды и ёлки
 //....................................................................................
 //....................................................................................
 //....................................................................................
@@ -208,10 +208,11 @@ void setup()
     eeprom_write_byte((uint8_t *)0x02, progStar);
     eeprom_write_byte((uint8_t *)0x03, brightStripe);
     eeprom_write_byte((uint8_t *)0x04, brightStar);
-    eeprom_write_byte((uint8_t *)0x05, speedStripe / 100);
-    eeprom_write_byte((uint8_t *)0x06, speedStar / 100);
+    eeprom_write_byte((uint8_t *)0x05, speedStripe / 100); // Уменьшаем, чтобы влезло в байт
+    eeprom_write_byte((uint8_t *)0x06, speedStar / 100);   // То же
+    eeprom_write_byte((uint8_t *)0x07, submode);
   }
-  else  // Если не первый запуск загружаем переменные из ЕЕPROM
+  else // Если не первый запуск загружаем переменные из ЕЕPROM
   {
     progStripe = eeprom_read_byte((uint8_t *)0x01);
     progStar = eeprom_read_byte((uint8_t *)0x02);
@@ -219,7 +220,10 @@ void setup()
     brightStar = eeprom_read_byte((uint8_t *)0x04);
     speedStripe = eeprom_read_byte((uint8_t *)0x05) * 100;
     speedStar = eeprom_read_byte((uint8_t *)0x06) * 100;
+    submode = eeprom_read_byte((uint8_t *)0x07);
   }
+  if (progStripe == (char)0xF0)
+    testLight = true;
   // Запускаем отладочный UART
   Serial.begin(9600);
   // Инициализируем порты светодиодов
@@ -227,7 +231,7 @@ void setup()
   pinMode(LED_BRIGHT, OUTPUT);
   pinMode(LED_PROGRAMM, OUTPUT);
   pinMode(LED_SPEED, OUTPUT);
-  // Настраиваем таймер1 и таймер2 на прерывания по переполнению 
+  // Настраиваем таймер1 и таймер2 на прерывания по переполнению
   setupInterrupt();
   //
 #ifdef ONE_STRIPE
@@ -245,42 +249,42 @@ void setup()
 #endif
   // настраиваем Звезду
   setupStripe(star, 50);
+  while (testLight)
+  {
+    for (int i = 0; i < 4; i++)
+      stripe[i].setBrightness(170);
+    star.setBrightness(170);
+    for (int i = 0; i < 4; i++)
+    {
+      for (uint16_t n = 0; n < stripe[0].numPixels(); n++)
+        stripe[i].setPixelColor(n, stripe[0].Color(255, 255, 255));
+    }
+    for (uint16_t i = 0; i < star.numPixels(); i++)
+      star.setPixelColor(i, star.Color(255, 255, 255));
+    for (int i = 0; i < 4; i++)
+      stripe[i].show();
+    star.show();
+  }
 }
 //....................................................................................
 //....................................................................................
 void loop()
 {
   // Serial.println(speedStripe);
-#ifdef ONE_STRIPE
-  stripe.setBrightness(brightStripe);
-#endif
-#ifdef FOUR_STRIPES
   for (int i = 0; i < 4; i++)
     stripe[i].setBrightness(brightStripe);
-#endif
   star.setBrightness(brightStar);
   if (speedStripe - 1 <= progCountStripe) // Если попали в Каунтер, запускаем функцию Ёлки
   {
-#ifdef ONE_STRIPE
-    statefunction(stripe, progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
-#endif
-#ifdef FOUR_STRIPES
     statefunction4stripes(progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
-#endif
     progCountStripe = 0; // Обнуляем каунтер
   }
   if (speedStar - 1 <= progCountStar) // Если попали в Каунтер, запускаем функцию Звезды
   {
     if (progStar == 4 && progStripe == 4) // Если программа Ёлки и Звезды - бегущий огонь, синхронизируем их
     {
-#ifdef ONE_STRIPE
-      if (roundcountStripe == stripe.numPixels())
-        sync = true;
-#endif
-#ifdef FOUR_STRIPES
       if (roundcountStripe == stripe[0].numPixels())
         sync = true;
-#endif
       if (sync == true)
       {
         statefunction(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
@@ -296,8 +300,8 @@ void loop()
       statefunction(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
     progCountStar = 0;
   }
-  progCountStar++; // Увеличиваем Каунтеры каждый цикл
-  progCountStripe++;  // Увеличиваем Каунтеры каждый цикл
+  progCountStar++;   // Увеличиваем Каунтеры каждый цикл
+  progCountStripe++; // Увеличиваем Каунтеры каждый цикл
   if (save == true)
   {
 
@@ -308,6 +312,7 @@ void loop()
     eeprom_write_byte((uint8_t *)0x04, brightStar);
     eeprom_write_byte((uint8_t *)0x05, speedStripe / 100);
     eeprom_write_byte((uint8_t *)0x06, speedStar / 100);
+    eeprom_write_byte((uint8_t *)0x07, submode);
     cli();
     digitalWrite(LED_MODE, 0);
     digitalWrite(LED_PROGRAMM, 0);
@@ -454,17 +459,43 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
     firstPixelHue += 65536 / SPEED_RAINBOW_COEF;
   }
   break;
+  case 8: // SPEED=STATIC COLOR
+  {
+    uint32_t col = strip.gamma32(strip.ColorHSV((speedStar * 65535) / 10000));
+
+    for (uint16_t n = 0; n < strip.numPixels(); n++)
+    {
+      strip.setPixelColor(n, col);
+    }
+    strip.show();
+  }
+  break;
+  case 9: // ROUNDPIXEL (Non clear)
+  {
+    if (roundcount > stripe[0].numPixels() + 1)
+    {
+      roundcount = 0;
+      for (int i = 0; i < 4; i++)
+        strip.clear();
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+      colRand = strip.gamma32(strip.ColorHSV((uint16_t)random()));
+      strip.setPixelColor(roundcount, colRand);
+      strip.show();
+    }
+    roundcount++;
+  }
+  break;
 #endif
   default:
   {
-    if (programma > 6)
+    if (programma > 9)
       programma = 1;
     if (programma == 0)
     {
-      programma = 6;
-#ifdef FOUR_STRIPES
-      programma = 7;
-#endif
+      programma = 9;
     }
   }
   break;
@@ -603,18 +634,50 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
     firstPixelHue += 65536 / SPEED_RAINBOW_COEF;
   }
   break;
+  case 8: // SPEED=STATIC COLOR
+  {
+    uint32_t col = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)((speedStripe * 65535) / 10000)));
+    for (int i = 0; i < 4; i++)
+    {
+      for (uint16_t n = 0; n < stripe[0].numPixels(); n++)
+      {
+        stripe[i].setPixelColor(n, col);
+      }
+      stripe[i].show();
+    }
+  }
+  break;
+  case 9: // ROUNDPIXEL (Non clear)
+  {
+    if (roundcount > stripe[0].numPixels() + 1)
+    {
+      roundcount = 0;
+      for (int i = 0; i < 4; i++)
+        stripe[i].clear();
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+      colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
+      stripe[i].setPixelColor(roundcount, colRand);
+      stripe[i].show();
+    }
+    roundcount++;
+  }
+  break;
   default:
   {
-    if (programma > 7)
+    if (programma > 9)
       programma = 1;
     if (programma == 0)
-      programma = 7;
+      programma = 9;
   }
   break;
   }
 }
 #endif
-extern "C" void __vector_9 (void) __attribute__ ((signal, used, externally_visible)) ; void __vector_9 (void)
+extern "C" void __vector_9(void) __attribute__((signal, used, externally_visible));
+void __vector_9(void)
 {
   switch (mode)
   {
@@ -686,7 +749,8 @@ extern "C" void __vector_9 (void) __attribute__ ((signal, used, externally_visib
 }
 //....................................................................................
 //....................................................................................
-extern "C" void __vector_13 (void) __attribute__ ((signal, used, externally_visible)) ; void __vector_13 (void)
+extern "C" void __vector_13(void) __attribute__((signal, used, externally_visible));
+void __vector_13(void)
 {
   int value = analogRead(BUTTONS_ADC_PIN);
   calcButton(value);
@@ -694,28 +758,28 @@ extern "C" void __vector_13 (void) __attribute__ ((signal, used, externally_visi
     timeButton--;
   if (value && !timeButton)
   {
-    if (value == BUTTON_HIDDEN)
+    if (value == BUTTON_UP_AND_DOWN)
     {
-      timeButton = 100;
+      timeButton = 50;
       flag = true;
     }
     if (value == BUTTON_UP)
     {
       up = true;
       flag = true;
-      timeButton = 100;
+      timeButton = 50;
     }
     if (value == BUTTON_DOWN)
     {
       dn = true;
       flag = true;
-      timeButton = 100;
+      timeButton = 50;
     }
     if (value == BUTTON_MODE)
     {
       md = true;
       flag = true;
-      timeButton = 100;
+      timeButton = 50;
     }
 
     if (md)
@@ -728,13 +792,19 @@ extern "C" void __vector_13 (void) __attribute__ ((signal, used, externally_visi
     }
     if (mode == MODE_DEFAULT)
     {
-      if (value == BUTTON_HIDDEN)
+      if (value == BUTTON_UP_AND_DOWN)
         save = true;
       up = false;
       dn = false;
     }
     if (mode == MODE_STRIPE)
     {
+      if (testLight)
+      {
+        progStripe = 5;
+        eeprom_write_byte((uint8_t *)0x01, progStripe);
+        testLight = false;
+      }
       if (up)
       {
         submode += 1;
@@ -752,6 +822,7 @@ extern "C" void __vector_13 (void) __attribute__ ((signal, used, externally_visi
     }
     if (mode == MODE_PROGRAMM)
     {
+      // testLight = 0;
       if (submode == SUBMODE_STRIPE)
       {
         if (up)
@@ -808,8 +879,8 @@ extern "C" void __vector_13 (void) __attribute__ ((signal, used, externally_visi
           brightStripe -= BRIGHT_STEP;
           dn = false;
         }
-        if (brightStripe < 1)
-          brightStripe = 1;
+        if (brightStripe < BRIGHT_STEP)
+          brightStripe = BRIGHT_STEP;
         if (brightStripe > BRIGHT_MAX)
           brightStripe = BRIGHT_MAX;
       }
@@ -825,8 +896,8 @@ extern "C" void __vector_13 (void) __attribute__ ((signal, used, externally_visi
           brightStar -= BRIGHT_STEP;
           dn = false;
         }
-        if (brightStar < 1)
-          brightStar = 1;
+        if (brightStar < BRIGHT_STEP)
+          brightStar = BRIGHT_STEP;
         if (brightStar > BRIGHT_MAX)
           brightStar = BRIGHT_MAX;
       }
@@ -844,9 +915,9 @@ extern "C" void __vector_13 (void) __attribute__ ((signal, used, externally_visi
           brightStar = brightStripe;
           dn = false;
         }
-        if (brightStripe < 1)
+        if (brightStripe < BRIGHT_STEP)
         {
-          brightStripe = 1;
+          brightStripe = BRIGHT_STEP;
           brightStar = brightStripe;
         }
         if (brightStripe > BRIGHT_MAX)
