@@ -10,26 +10,13 @@
 
 #include <Adafruit_NeoPixel.h> // Установить через менеджер библиотек
 
-//--------------------------USER PRESETS------------------------------\/
-
-// #define ONE_STRIPE
-#define FOUR_STRIPES
-
 //--------------------------HARDWARE PRESETS--------------------------\/
 
-#define LED_TOTAL 82 // Общее количество светодиодов в Ёлке
-// #define LED_STAR 8              // Количество светодиодов звезды (с обоих сторон последовательно) (TEST)
-#define LED_STAR 10 // Количество светодиодов звезды (с обоих сторон последовательно)
-// #define LED_4STRIPE 16          // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок (TEST)
+#define LED_TOTAL 82   // Общее количество светодиодов в Ёлке
+#define LED_STAR 10    // Количество светодиодов звезды (с обоих сторон последовательно)
 #define LED_4STRIPE 18 // (4+4+3+3+2+2) Количество светодиодов в одной из 4-х полосок
-// #define LED_1STRIPE 32           // Количество светодиодов в одной полоске (4 полоски последовательно) (TEST)
 #define LED_1STRIPE 72 // Количество светодиодов в одной полоске (4 полоски последовательно)
 
-#ifdef ONE_STRIPE
-#define STRIPE_PIN 5 // Пин ленты
-#endif
-
-#ifdef FOUR_STRIPES
 #define STRIPE0_PIN 8         // Пин ленты
 #define STRIPE1_PIN 7         // Пин второй ленты
 #define STRIPE2_PIN 6         // Пин третьей ленты
@@ -37,7 +24,6 @@
 #define LED_STRIPE_UP 18      // Макс значение для верхнего уровня
 #define LED_STRIPE_BOTTOM 8   // Макс значение для нижнего уровня
 #define LED_STRIPE_BETWEEN 14 // Макс значение для среднего уровня
-#endif
 
 #define STAR_PIN 9         // Пин ленты звезды
 #define BUTTONS_ADC_PIN 14 // Пин кнопок
@@ -69,7 +55,7 @@
 #define SPEED_STEP 500              // Шаг изменения замедления
 #define SPEED_MIN 500               // Минимально возможное замедление (Далее всё сливается в кучу)
 #define CORRECT_SPEED_RAINBOW 10    // Коэффициент коррекции скорости режима rainbow
-#define SPEED_RAINBOW_COEF sp       // Переменная коррекции скорости режима rainbow
+#define SPEED_RAINBOW_COEF 512      // Переменная коррекции скорости режима rainbow
 #define BRIGHT_STEP BRIGHT_MAX / 30 // Шаг изменения яркости
 
 //-----------------------------MACRO FOR ADC CALCULATE----------------\/
@@ -95,9 +81,9 @@
 
 //-----------------------------PRESETS FOR MACRO---------------------\/
 
-#define BUTTON_UP SW2          // Выбор значения напряжения для кнопки 1.6-1.8V
-#define BUTTON_DOWN SW1        // Выбор значения напряжения для кнопки 3.2-3.4V
-#define BUTTON_MODE SW3        // Выбор значения напряжения для кнопки 2.4-2.6V
+#define BUTTON_UP SW2          // Выбор значения напряжения для кнопки 2.4-2.6V
+#define BUTTON_DOWN SW1        // Выбор значения напряжения для кнопки 1.6-1.8V
+#define BUTTON_MODE SW3        // Выбор значения напряжения для кнопки 3.2-3.4V
 #define BUTTON_UP_AND_DOWN SW4 // Выбор значения напряжения для кнопки 2.9-3.1V
 
 //----------------------------EXAMPLE FOR MACRO----------------------\/
@@ -115,18 +101,12 @@
 #define TYPELED NEO_GRB     // NEO_GRB (пиксели привязаны к битовому потоку GRB - лента WS2812)
 #define LEDSPEED NEO_KHZ800 // NEO_KHZ800 (800 кГц - указывается для светодиодов WS2812)
 
-#ifdef ONE_STRIPE
-Adafruit_NeoPixel stripe(LED_1STRIPE, STRIPE_PIN, TYPELED + LEDSPEED);
-Adafruit_NeoPixel star(LED_STAR, STAR_PIN, TYPELED + LEDSPEED);
-#endif
-#ifdef FOUR_STRIPES
 Adafruit_NeoPixel stripe1(LED_4STRIPE, STRIPE0_PIN, TYPELED + LEDSPEED);
 Adafruit_NeoPixel stripe2(LED_4STRIPE, STRIPE1_PIN, TYPELED + LEDSPEED);
 Adafruit_NeoPixel stripe3(LED_4STRIPE, STRIPE2_PIN, TYPELED + LEDSPEED);
 Adafruit_NeoPixel stripe4(LED_4STRIPE, STRIPE3_PIN, TYPELED + LEDSPEED);
 Adafruit_NeoPixel stripe[4];
 Adafruit_NeoPixel star(LED_STAR, STAR_PIN, TYPELED + LEDSPEED);
-#endif
 
 //----------------------------FUNCTION PROTOTYPES-----------------------\/
 /*!
@@ -146,24 +126,28 @@ void setupStripe(Adafruit_NeoPixel &strip, uint8_t brightness);
     @param  &strip указатель на объект Adafruit_NeoPixel
     @param  &programma указатель на переменную действующей программы
     @param  &firstPixelHue Последний параметр Hue для первого пикселя режима Rainbow
-    @param  &roundcount Каунтер
+    @param  &roundcount Каунтер цикла
     @param  sp Параметр скорости Rainbow
     @return  void
   */
-void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
-#ifdef FOUR_STRIPES
+void buildStripe(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
 /*!
     @brief  Функция вызова цикла программы для 4-х строк
     @param  &programma указатель на переменную действующей программы
     @param  &firstPixelHue Последний параметр Hue для первого пикселя режима Rainbow
-    @param  &roundcount Каунтер
-    @param  sp Параметр скорости Rainbow
+    @param  &roundcount Каунтер цикла
+    @param  sp Параметр скорости 
     @return  void
   */
-void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
-#endif
+void buildTree(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
+/*!
+    @brief  Функция отображения результата игры
+    @return  void
+  */
+void scoreControl(void);
 
 //----------------------------VARIABLES-----------------------------\/
+char rxBuffer[100]; // Буфер UART (Не используется)
 
 //----------------------------CYCLE---------------------------------\/
 // Переменные для циклически неповторяющихся эффектов
@@ -176,8 +160,11 @@ char timeButton = 0;              // Каунтер для нажатия кно
 char strobe = 0;                  // Каунтер для статусных светодиодов
 unsigned int progCountStripe = 0; // Каунтер для программ Ёлки
 unsigned int progCountStar = 0;   // Каунтер для программ Звезды
+uint8_t staticCounterStripe = 0;  // Каунтер статичного цвета Ёлки
+uint8_t staticCounterStar = 0;    // Каунтер статичного цвета Звезды
 int mode = 0;                     // Каунтер режимов
 int submode = 0;                  // Каунтер подрежима выбора
+unsigned int gameCount = 0;       // Каунтер времени для игры
 //----------------------------SETTINGS (BASE)-----------------------\/
 // БАЗОВЫЕ УСТАНОВКИ ПРИ ПЕРВОМ СТАРТЕ!
 char progStripe = 4;             // Программа Ёлки
@@ -187,14 +174,43 @@ unsigned int speedStripe = 1000; // Скорость Ёлки
 unsigned int brightStar = 50;    // Яркость Звезды
 unsigned int speedStar = 1000;   // Скорость звезды
 // Флаги
-char firststart = 1; // Флаг первого запуска
-char testLight = false;
-bool save = false; // Флаг сохранения параметров
-bool up = false;   // Флаг нажатия кнопки +
-bool dn = false;   // Флаг нажатия кнопки -
-bool md = false;   // Флаг нажатия кнопки Режим
-bool flag = false; // Флаг нажатия любой из кнопок
-bool sync = false; // Флаг синхронизации программы звезды и ёлки
+char firststart = 1;             // Флаг первого запуска
+char testLight = false;          // Флаг тестового Белого цвета
+bool save = false;               // Флаг сохранения параметров
+bool up = false;                 // Флаг нажатия кнопки +
+bool dn = false;                 // Флаг нажатия кнопки -
+bool md = false;                 // Флаг нажатия кнопки Режим
+bool sync = false;               // Флаг синхронизации программы звезды и ёлки
+volatile bool flagLight = false; // Флаг включения режима свечения в игре
+volatile bool flagGame = false;  // Флаг включения режима игры
+volatile bool tap1 = false;      // Флаг нажатия кнопки (Порт UART)
+volatile bool tap2 = false;      // Флаг нажатия кнопки (Порт UART)
+
+// Переменные режима игры (Опционально)
+uint16_t treeStripe = 0;  // Переменная хранения рандомного значения строки светодиодов
+uint16_t treeLed = 0;     // Переменная хранения рандомного значения светодиода в строке
+unsigned int p1score = 0; // Переменная счёта игрока 1
+unsigned int p2score = 0; // Переменная счёта игрока 2
+unsigned int gameStop;    // Переменная для хранения времени включения Лампы в игре
+
+//----------------------------STATIC LIGHTS-------------------------\/
+static const uint32_t staticColor[] PROGMEM{
+    0xFF0000, // RED
+    0xFF7F00, // YELLOW RED 
+    0xFFFF00, // YELLOW
+    0x7FFF00, // YELLOW GREEN 
+    0x00FF00, // GREEN
+    0x00FF7F, // CYAN GREEN
+    0x00FFFF, // CYAN
+    0x007FFF, // CYAN BLUE
+    0x0000FF, // BLUE
+    0x7F00FF, // MAGENTA BLUE
+    0xFF00FF, // MAGENTA
+    0xFF007F, // MAGENTA RED
+              // ... and more
+};
+const uint8_t staticColorMax = (sizeof(staticColor) / sizeof(uint32_t)) - 1;
+
 //....................................................................................
 //....................................................................................
 //....................................................................................
@@ -211,6 +227,8 @@ void setup()
     eeprom_write_byte((uint8_t *)0x05, speedStripe / 100); // Уменьшаем, чтобы влезло в байт
     eeprom_write_byte((uint8_t *)0x06, speedStar / 100);   // То же
     eeprom_write_byte((uint8_t *)0x07, submode);
+    eeprom_write_byte((uint8_t *)0x08, staticCounterStripe);
+    eeprom_write_byte((uint8_t *)0x09, staticCounterStar);
   }
   else // Если не первый запуск загружаем переменные из ЕЕPROM
   {
@@ -221,35 +239,34 @@ void setup()
     speedStripe = eeprom_read_byte((uint8_t *)0x05) * 100;
     speedStar = eeprom_read_byte((uint8_t *)0x06) * 100;
     submode = eeprom_read_byte((uint8_t *)0x07);
+    staticCounterStripe = eeprom_read_byte((uint8_t *)0x08);
+    staticCounterStar = eeprom_read_byte((uint8_t *)0x09);
   }
+  // Запуск белого цвета если в EEPROM положить кодовую комбинацию F0
   if (progStripe == (char)0xF0)
     testLight = true;
-  // Запускаем отладочный UART
-  Serial.begin(9600);
   // Инициализируем порты светодиодов
   pinMode(LED_MODE, OUTPUT);
   pinMode(LED_BRIGHT, OUTPUT);
   pinMode(LED_PROGRAMM, OUTPUT);
   pinMode(LED_SPEED, OUTPUT);
+  // Инициализируем пины для режима игры
+  pinMode(0, INPUT_PULLUP);
+  pinMode(1, INPUT_PULLUP);
   // Настраиваем таймер1 и таймер2 на прерывания по переполнению
   setupInterrupt();
-  //
-#ifdef ONE_STRIPE
-  setupStripe(stripe, 100);
-#endif
-#ifdef FOUR_STRIPES
-  // Записываем В массив для простоты обращения к полоскам светодиодов
+  // Записываем В массив для простоты обращения к полоскам светодиодов (Да, это просто растрата памяти)
   stripe[0] = stripe1;
   stripe[1] = stripe2;
   stripe[2] = stripe3;
   stripe[3] = stripe4;
-  // И настраиваем полоски
+  // И настраиваем Дерево
   for (int i = 0; i < 4; i++)
     setupStripe(stripe[i], 50);
-#endif
-  // настраиваем Звезду
+  // Настраиваем Звезду
   setupStripe(star, 50);
-  while (testLight)
+  // Запуск белого цвета если в EEPROM положить кодовую комбинацию F0
+  while (testLight) // Пока не прервём кнопкой MODE
   {
     for (int i = 0; i < 4; i++)
       stripe[i].setBrightness(170);
@@ -265,66 +282,121 @@ void setup()
       stripe[i].show();
     star.show();
   }
+  randomSeed(analogRead(19)); // Организуем рандом из космоса
+  gameStop = random(5000);    // Присваиваем рандомное значение для игры
 }
 //....................................................................................
 //....................................................................................
 void loop()
 {
-  // Serial.println(speedStripe);
+  // Выставляем яркость
   for (int i = 0; i < 4; i++)
     stripe[i].setBrightness(brightStripe);
   star.setBrightness(brightStar);
-  if (speedStripe - 1 <= progCountStripe) // Если попали в Каунтер, запускаем функцию Ёлки
+  // Цикл игры
+  if (flagGame)
   {
-    statefunction4stripes(progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
-    progCountStripe = 0; // Обнуляем каунтер
-  }
-  if (speedStar - 1 <= progCountStar) // Если попали в Каунтер, запускаем функцию Звезды
-  {
-    if (progStar == 4 && progStripe == 4) // Если программа Ёлки и Звезды - бегущий огонь, синхронизируем их
+    if (!flagLight) // То чистим ёлку
     {
-      if (roundcountStripe == stripe[0].numPixels())
-        sync = true;
-      if (sync == true)
+      for (int i = 0; i < 4; i++)
       {
-        statefunction(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
-      }
-      if (roundcountStar == star.numPixels() + 1)
-      {
-        star.clear();
-        star.show();
-        sync = false;
+        stripe[i].fill(0);
+        stripe[i].show();
       }
     }
-    else // Иначе просто запускаем программу
-      statefunction(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
-    progCountStar = 0;
+    if (gameCount == gameStop) // То включаем рандомный светодиод
+    {
+      flagLight = true;
+      stripe[treeStripe].setPixelColor(treeLed, 0x0000FF);
+      stripe[treeStripe + 2].setPixelColor(treeLed, 0x0000FF);
+      stripe[treeStripe].show();
+      stripe[treeStripe + 2].show();
+    }
+    if (gameCount == (gameStop + 1000)) // Выключаем рандомный светодиод и обновляем значения для следующего цикла
+    {
+      flagLight = false;
+      treeStripe = random(2);
+      treeLed = random(18);
+      gameStop = random(5000);
+      for (int i = 0; i < 4; i++)
+      {
+        stripe[i].fill(0);
+        stripe[i].show();
+      }
+      gameCount = 0;
+    }
+    if (gameCount > 10000)
+      gameCount = 0;
+    scoreControl(); // Выводим значения статистики на Ёлку и Звезду
+    gameCount++;    // Увеличиваем цикл
   }
-  progCountStar++;   // Увеличиваем Каунтеры каждый цикл
-  progCountStripe++; // Увеличиваем Каунтеры каждый цикл
-  if (save == true)
-  {
 
-    eeprom_write_byte((uint8_t *)0x00, 13);
-    eeprom_write_byte((uint8_t *)0x01, progStripe);
-    eeprom_write_byte((uint8_t *)0x02, progStar);
-    eeprom_write_byte((uint8_t *)0x03, brightStripe);
-    eeprom_write_byte((uint8_t *)0x04, brightStar);
-    eeprom_write_byte((uint8_t *)0x05, speedStripe / 100);
-    eeprom_write_byte((uint8_t *)0x06, speedStar / 100);
-    eeprom_write_byte((uint8_t *)0x07, submode);
-    cli();
-    digitalWrite(LED_MODE, 0);
-    digitalWrite(LED_PROGRAMM, 0);
-    digitalWrite(LED_BRIGHT, 0);
-    digitalWrite(LED_SPEED, 0);
-    _delay_ms(1000);
-    digitalWrite(LED_MODE, 1);
-    digitalWrite(LED_PROGRAMM, 1);
-    digitalWrite(LED_BRIGHT, 1);
-    digitalWrite(LED_SPEED, 1);
-    save = false;
-    sei();
+  else // Используем стандартную иллюминацию
+  {
+    //................................................................
+    if (speedStripe == progCountStripe) // Если попали в Каунтер, запускаем функцию Ёлки
+    {
+      buildTree(progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
+      progCountStripe = 1; // Обнуляем каунтер
+    }
+
+    //................................................................
+    if (speedStar == progCountStar) // Если попали в Каунтер, запускаем функцию Звезды
+    {
+      // Если программа Ёлки и Звезды - бегущий огонь, синхронизируем их
+      //------------------------------------------------------------------
+      if (progStar == 4 && progStripe == 4)
+      {
+        if (roundcountStripe == stripe[0].numPixels())
+          sync = true;
+        if (sync == true)
+        {
+          buildStripe(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
+        }
+        if (roundcountStar == star.numPixels() + 1)
+        {
+          star.clear();
+          star.show();
+          sync = false;
+        }
+      }
+      //------------------------------------------------------------------
+      else // Иначе просто запускаем программу
+        buildStripe(star, progStar, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
+      progCountStar = 1;
+    }
+
+    //................................................................
+    progCountStar++;   // Увеличиваем Каунтеры каждый цикл
+    progCountStripe++; // Увеличиваем Каунтеры каждый цикл
+
+    //................................................................
+    if (save == true) // Сохраняем параметры
+    {
+
+      eeprom_write_byte((uint8_t *)0x00, 13);
+      eeprom_write_byte((uint8_t *)0x01, progStripe);
+      eeprom_write_byte((uint8_t *)0x02, progStar);
+      eeprom_write_byte((uint8_t *)0x03, brightStripe);
+      eeprom_write_byte((uint8_t *)0x04, brightStar);
+      eeprom_write_byte((uint8_t *)0x05, speedStripe / 100);
+      eeprom_write_byte((uint8_t *)0x06, speedStar / 100);
+      eeprom_write_byte((uint8_t *)0x07, submode);
+      eeprom_write_byte((uint8_t *)0x08, staticCounterStripe);
+      eeprom_write_byte((uint8_t *)0x09, staticCounterStar);
+      cli();
+      digitalWrite(LED_MODE, 0);
+      digitalWrite(LED_PROGRAMM, 0);
+      digitalWrite(LED_BRIGHT, 0);
+      digitalWrite(LED_SPEED, 0);
+      _delay_ms(1000);
+      digitalWrite(LED_MODE, 1);
+      digitalWrite(LED_PROGRAMM, 1);
+      digitalWrite(LED_BRIGHT, 1);
+      digitalWrite(LED_SPEED, 1);
+      save = false;
+      sei();
+    }
   }
 }
 //....................................................................................
@@ -356,7 +428,7 @@ void setupStripe(Adafruit_NeoPixel &strip, uint8_t brightness)
 }
 //....................................................................................
 //....................................................................................
-void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, int sp)
+void buildStripe(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, uint16_t &roundcount, int sp)
 {
   uint32_t colRand = strip.gamma32(strip.ColorHSV((uint16_t)random()));
   uint8_t num = random();
@@ -440,7 +512,6 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
     }
   }
   break;
-#ifdef FOUR_STRIPES
   case 7: // RAINBOW PER 1 SITE
   {
     for (int a = 0; a < 5; a++)
@@ -461,11 +532,9 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
   break;
   case 8: // SPEED=STATIC COLOR
   {
-    uint32_t col = strip.gamma32(strip.ColorHSV((speedStar * 65535) / 10000));
-
     for (uint16_t n = 0; n < strip.numPixels(); n++)
     {
-      strip.setPixelColor(n, col);
+      strip.setPixelColor(n, pgm_read_dword(&staticColor[staticCounterStar]));
     }
     strip.show();
   }
@@ -488,7 +557,6 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
     roundcount++;
   }
   break;
-#endif
   default:
   {
     if (programma > 9)
@@ -501,8 +569,9 @@ void statefunction(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue
   break;
   }
 }
-#ifdef FOUR_STRIPES // ФУНКЦИЯ ОБРАБОТКИ ОДНОВРЕМЕННО 4-Х ПОЛОСОК
-void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp)
+//....................................................................................
+//....................................................................................
+void buildTree(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp)
 {
   uint32_t colRand;
   uint8_t num;
@@ -636,12 +705,11 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
   break;
   case 8: // SPEED=STATIC COLOR
   {
-    uint32_t col = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)((speedStripe * 65535) / 10000)));
     for (int i = 0; i < 4; i++)
     {
       for (uint16_t n = 0; n < stripe[0].numPixels(); n++)
       {
-        stripe[i].setPixelColor(n, col);
+        stripe[i].setPixelColor(n, pgm_read_dword(&staticColor[staticCounterStripe]));
       }
       stripe[i].show();
     }
@@ -675,11 +743,41 @@ void statefunction4stripes(char &programma, int &firstPixelHue, uint16_t &roundc
   break;
   }
 }
-#endif
+//....................................................................................
+//.......................ПРЕРЫВАНИЕ...................................................
 extern "C" void __vector_9(void) __attribute__((signal, used, externally_visible));
 void __vector_9(void)
 {
-  switch (mode)
+  if (tap1) // Манипуляции по нажатию кнопки
+  {
+    if (flagLight)
+    {
+      p1score++;
+    }
+    else
+    {
+      if (p1score)
+        p1score--;
+    }
+    flagLight = false;
+    tap1 = false;
+  }
+
+  if (tap2) // Манипуляции по нажатию кнопки
+  {
+    if (flagLight)
+    {
+      p2score++;
+    }
+    else
+    {
+      if (p2score)
+        p2score--;
+    }
+    flagLight = false;
+    tap2 = false;
+  }
+  switch (mode) // Организация свечения статусных светодиодов согласно режиму
   {
   case MODE_DEFAULT:
   {
@@ -718,7 +816,7 @@ void __vector_9(void)
   }
   break;
   }
-  if (mode != MODE_DEFAULT)
+  if (mode != MODE_DEFAULT) // Организация мерцания Синего светодиода
   {
     if (submode == SUBMODE_ALL)
     {
@@ -748,37 +846,59 @@ void __vector_9(void)
   }
 }
 //....................................................................................
-//....................................................................................
+//.......................ПРЕРЫВАНИЕ...................................................
 extern "C" void __vector_13(void) __attribute__((signal, used, externally_visible));
 void __vector_13(void)
 {
   int value = analogRead(BUTTONS_ADC_PIN);
   calcButton(value);
-  if (timeButton)
+  if (timeButton) // Если задержка
     timeButton--;
-  if (value && !timeButton)
+  if (!digitalRead(0) && !timeButton)
+  {
+    if (flagGame)
+      tap1 = true;
+    else
+    {
+      flagGame = true;
+      treeLed = random(18);
+      treeStripe = random(2);
+    }
+    timeButton = 50;
+  }
+  if (!digitalRead(1) && !timeButton)
+  {
+    if (flagGame)
+      tap2 = true;
+    else
+    {
+      flagGame = true;
+      treeLed = random(18);
+      treeStripe = random(2);
+    }
+    timeButton = 50;
+  }
+
+  if (value && !timeButton) // Манипуляции по нажатию кнопок ёлки
   {
     if (value == BUTTON_UP_AND_DOWN)
     {
       timeButton = 50;
-      flag = true;
     }
     if (value == BUTTON_UP)
     {
       up = true;
-      flag = true;
       timeButton = 50;
     }
     if (value == BUTTON_DOWN)
     {
       dn = true;
-      flag = true;
       timeButton = 50;
     }
     if (value == BUTTON_MODE)
     {
       md = true;
-      flag = true;
+      flagGame = false;
       timeButton = 50;
     }
 
@@ -933,12 +1053,27 @@ void __vector_13(void)
       {
         if (up)
         {
-          speedStripe -= SPEED_STEP;
+          if (progStripe == 8) // Если статик цвет
+          {
+            staticCounterStripe++;
+            if (staticCounterStripe > staticColorMax)
+              staticCounterStripe = 0;
+          }
+          else
+            speedStripe -= SPEED_STEP;
           up = false;
         }
         if (dn)
         {
-          speedStripe += SPEED_STEP;
+          if (progStripe == 8) // Если статик цвет
+          {
+            if (staticCounterStripe == 0)
+              staticCounterStripe = staticColorMax;
+            else
+              staticCounterStripe--;
+          }
+          else
+            speedStripe += SPEED_STEP;
           dn = false;
         }
         if (speedStripe < SPEED_MIN)
@@ -950,12 +1085,27 @@ void __vector_13(void)
       {
         if (up)
         {
-          speedStar -= SPEED_STEP;
+          if (progStar == 8) // Если статик цвет
+          {
+            staticCounterStar++;
+            if (staticCounterStar > staticColorMax)
+              staticCounterStar = 0;
+          }
+          else
+            speedStar -= SPEED_STEP;
           up = false;
         }
         if (dn)
         {
-          speedStar += SPEED_STEP;
+          if (progStar == 8) // Если статик цвет
+          {
+            if (staticCounterStar == 0)
+              staticCounterStar = staticColorMax;
+            else
+              staticCounterStar--;
+          }
+          else
+            speedStar += SPEED_STEP;
           dn = false;
         }
         if (speedStar < SPEED_MIN)
@@ -967,14 +1117,31 @@ void __vector_13(void)
       {
         if (up)
         {
-          speedStripe -= SPEED_STEP;
+          if (progStripe == 8) // Если статик цвет
+          {
+            staticCounterStripe++;
+            if (staticCounterStripe > staticColorMax)
+              staticCounterStripe = 0;
+          }
+          else
+            speedStripe -= SPEED_STEP;
           speedStar = speedStripe;
+          staticCounterStar = staticCounterStripe;
           up = false;
         }
         if (dn)
         {
-          speedStripe += SPEED_STEP;
+          if (progStripe == 8) // Если статик цвет
+          {
+            if (staticCounterStripe == 0)
+              staticCounterStripe = staticColorMax;
+            else
+              staticCounterStripe--;
+          }
+          else
+            speedStripe += SPEED_STEP;
           speedStar = speedStripe;
+          staticCounterStar = staticCounterStripe;
           dn = false;
         }
         if (speedStripe < SPEED_MIN)
@@ -988,6 +1155,63 @@ void __vector_13(void)
           speedStar = speedStripe;
         }
       }
+    }
+  }
+}
+void scoreControl(void)
+{
+  star.clear();
+  for (unsigned int i = 0; i < p2score; i++)
+    star.setPixelColor(i, 0xFF0000);
+  for (unsigned int i = 5; i < p1score + 5; i++)
+    star.setPixelColor(i, 0x00FF00);
+  star.show();
+  if (p2score >= 5)
+  {
+    for (int i = 0; i < 4; i++)
+    {
+      for (uint16_t n = 0; n < stripe[0].numPixels(); n++)
+      {
+        stripe[i].setPixelColor(n, 0xFF0000);
+      }
+      stripe[i].show();
+    }
+    p2score = 0;
+    p1score = 0;
+    flagGame = false;
+    gameStop = random(5000);
+    delay(3000);
+    for (int i = 0; i < 4; i++)
+    {
+      for (uint16_t n = 0; n < stripe[0].numPixels(); n++)
+      {
+        stripe[i].setPixelColor(n, 0);
+      }
+      stripe[i].show();
+    }
+  }
+  if (p1score >= 5)
+  {
+    for (int i = 0; i < 4; i++)
+    {
+      for (uint16_t n = 0; n < stripe[0].numPixels(); n++)
+      {
+        stripe[i].setPixelColor(n, 0x00FF00);
+      }
+      stripe[i].show();
+    }
+    p1score = 0;
+    p2score = 0;
+    flagGame = false;
+    gameStop = random(5000);
+    delay(3000);
+    for (int i = 0; i < 4; i++)
+    {
+      for (uint16_t n = 0; n < stripe[0].numPixels(); n++)
+      {
+        stripe[i].setPixelColor(n, 0);
+      }
+      stripe[i].show();
     }
   }
 }
