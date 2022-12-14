@@ -27,10 +27,10 @@
 
 #define STAR_PIN 9         // Пин ленты звезды
 #define BUTTONS_ADC_PIN 14 // Пин кнопок
-#define LED_BLUE 17        // Пин синего светодиода
-#define LED_GREEN 16       // Пин зеленого светодиода
-#define LED_RED 18         // Пин красного светодиода
-#define LED_YELLOW 15      // Пин желтого светодиода
+#define LED_BLUE 17        // Пин синего светодиода VD3
+#define LED_GREEN 16       // Пин зеленого светодиода VD2
+#define LED_RED 18         // Пин красного светодиода VD1
+#define LED_YELLOW 15      // Пин желтого светодиода VD4
 
 //--------------------------SOFTWARE PRESETS--------------------------\/
 
@@ -187,11 +187,14 @@ volatile bool tap1 = false;      // Флаг нажатия кнопки (Пор
 volatile bool tap2 = false;      // Флаг нажатия кнопки (Порт UART)
 
 // Переменные режима игры (Опционально)
-uint16_t treeStripe = 0;  // Переменная хранения рандомного значения строки светодиодов
-uint16_t treeLed = 0;     // Переменная хранения рандомного значения светодиода в строке
-unsigned int p1score = 0; // Переменная счёта игрока 1
-unsigned int p2score = 0; // Переменная счёта игрока 2
-unsigned int gameStop;    // Переменная для хранения времени включения Лампы в игре
+volatile uint16_t treeStripe = 0;  // Переменная хранения рандомного значения строки светодиодов
+volatile uint16_t treeLed = 0;     // Переменная хранения рандомного значения светодиода в строке
+volatile unsigned int p1score = 0; // Переменная счёта игрока 1
+volatile unsigned int p2score = 0; // Переменная счёта игрока 2
+volatile unsigned int gameStop;    // Переменная для хранения времени включения Лампы в игре
+volatile uint8_t colorGameP1 = 0;// Переменная выбранного цвета игроком 1
+volatile uint8_t colorGameP2 = 0;// Переменная выбранного цвета игроком 2
+volatile uint8_t trueColorGame = 0;//Переменная реального цвета 
 
 //----------------------------STATIC LIGHTS-------------------------\/
 static const uint32_t staticColor[] PROGMEM{
@@ -209,7 +212,17 @@ static const uint32_t staticColor[] PROGMEM{
     0xFF007F, // MAGENTA RED
               // ... and more
 };
+static const uint32_t staticColorGame[] PROGMEM{
+    0xFF0000, // RED
+    // 0xFFFF00, // YELLOW
+    0x00FF00, // GREEN
+    // 0x00FFFF, // CYAN
+    0x0000FF, // BLUE
+    // 0xFF00FF, // MAGENTA
+              // ... and more
+};
 const uint8_t staticColorMax = (sizeof(staticColor) / sizeof(uint32_t)) - 1;
+const uint8_t staticColorGameMax = (sizeof(staticColorGame) / sizeof(uint32_t));
 
 //....................................................................................
 //....................................................................................
@@ -283,7 +296,10 @@ void setup()
     star.show();
   }
   randomSeed(analogRead(19)); // Организуем рандом из космоса
-  gameStop = random(5000);    // Присваиваем рандомное значение для игры
+  gameStop = random(2000);    // Присваиваем рандомное значение для игры
+  trueColorGame = random(staticColorGameMax);
+  colorGameP2 = random(staticColorGameMax);
+  colorGameP1 = random(staticColorGameMax);
 }
 //....................................................................................
 //....................................................................................
@@ -307,17 +323,17 @@ void loop()
     if (gameCount == gameStop) // То включаем рандомный светодиод
     {
       flagLight = true;
-      stripe[treeStripe].setPixelColor(treeLed, 0x0000FF);
-      stripe[treeStripe + 2].setPixelColor(treeLed, 0x0000FF);
+      uint32_t color = pgm_read_dword(&staticColorGame[trueColorGame]);
+      stripe[treeStripe].setPixelColor(treeLed, color);
       stripe[treeStripe].show();
-      stripe[treeStripe + 2].show();
     }
     if (gameCount == (gameStop + 1000)) // Выключаем рандомный светодиод и обновляем значения для следующего цикла
     {
       flagLight = false;
-      treeStripe = random(2);
+      treeStripe = random(4);
       treeLed = random(18);
-      gameStop = random(5000);
+      gameStop = random(2000);
+      trueColorGame = random(staticColorGameMax);
       for (int i = 0; i < 4; i++)
       {
         stripe[i].fill(0);
@@ -325,7 +341,7 @@ void loop()
       }
       gameCount = 0;
     }
-    if (gameCount > 10000)
+    if (gameCount > 5000)
       gameCount = 0;
     scoreControl(); // Выводим значения статистики на Ёлку и Звезду
     gameCount++;    // Увеличиваем цикл
@@ -550,22 +566,31 @@ void buildStripe(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, 
 
     for (int i = 0; i < 4; i++)
     {
-      uint16_t hue = firstPixelHue + roundcount * 65536L / (strip.numPixels()/2);
+      uint16_t hue = firstPixelHue + roundcount * 65536L / (strip.numPixels() / 2);
       uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
       strip.setPixelColor(roundcount, color);
       strip.show();
     }
-    firstPixelHue += 65535/32;
+    firstPixelHue += 65535 / 32;
     roundcount++;
+  }
+  break;
+  case 10: // RANDOM PLACE or CLEAR
+  {
+    num = random(strip.numPixels());
+    if (strip.getPixelColor(num))
+      colRand = 0;
+    strip.setPixelColor(num, colRand);
+    strip.show();
   }
   break;
   default:
   {
-    if (programma > 9)
+    if (programma > 10)
       programma = 1;
     if (programma == 0)
     {
-      programma = 9;
+      programma = 10;
     }
   }
   break;
@@ -739,12 +764,25 @@ void buildTree(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp
     roundcount++;
   }
   break;
+  case 10: // RANDOM PLACE or CLEAR
+  {
+    num = random(stripe[0].numPixels());
+    colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
+    for (int i = 0; i < 4; i++)
+    {
+      if (stripe[i].getPixelColor(num))
+        colRand = 0;
+      stripe[i].setPixelColor(num, colRand);
+      stripe[i].show();
+    }
+  }
+  break;
   default:
   {
-    if (programma > 9)
+    if (programma > 10)
       programma = 1;
     if (programma == 0)
-      programma = 9;
+      programma = 10;
   }
   break;
   }
@@ -756,9 +794,10 @@ void __vector_9(void)
 {
   if (tap1) // Манипуляции по нажатию кнопки
   {
-    if (flagLight)
+    if (flagLight && trueColorGame == colorGameP1)
     {
       p1score++;
+      colorGameP1 = random(staticColorGameMax);
     }
     else
     {
@@ -769,11 +808,12 @@ void __vector_9(void)
     tap1 = false;
   }
 
-  if (tap2) // Манипуляции по нажатию кнопки
+  if (tap2 && trueColorGame == colorGameP2) // Манипуляции по нажатию кнопки
   {
     if (flagLight)
     {
       p2score++;
+      colorGameP2 = random(staticColorGameMax);
     }
     else
     {
@@ -868,7 +908,8 @@ void __vector_13(void)
     {
       flagGame = true;
       treeLed = random(18);
-      treeStripe = random(2);
+      treeStripe = random(4);
+      trueColorGame = random(staticColorGameMax);
     }
     timeButton = 50;
   }
@@ -880,7 +921,8 @@ void __vector_13(void)
     {
       flagGame = true;
       treeLed = random(18);
-      treeStripe = random(2);
+      treeStripe = random(4);
+      trueColorGame = random(staticColorGameMax);
     }
     timeButton = 50;
   }
@@ -1167,10 +1209,18 @@ void __vector_13(void)
 void scoreControl(void)
 {
   star.clear();
-  for (unsigned int i = 0; i < p2score; i++)
-    star.setPixelColor(i, 0xFF0000);
-  for (unsigned int i = 5; i < p1score + 5; i++)
-    star.setPixelColor(i, 0x00FF00);
+  for (unsigned int i = 0; i <= p2score; i++)
+  {
+    if (i != 0)
+      star.setPixelColor(i - 1, 0x707000);
+    star.setPixelColor(i, pgm_read_dword(&staticColorGame[colorGameP2]));
+  }
+  for (unsigned int i = 5; i <= p1score + 5; i++)
+  {
+    if (i != 5)
+      star.setPixelColor(i - 1, 0x007070);
+    star.setPixelColor(i, pgm_read_dword(&staticColorGame[colorGameP1]));
+  }
   star.show();
   if (p2score >= 5)
   {
@@ -1178,14 +1228,14 @@ void scoreControl(void)
     {
       for (uint16_t n = 0; n < stripe[0].numPixels(); n++)
       {
-        stripe[i].setPixelColor(n, 0xFF0000);
+        stripe[i].setPixelColor(n, 0x707000);
       }
       stripe[i].show();
     }
     p2score = 0;
     p1score = 0;
     flagGame = false;
-    gameStop = random(5000);
+    gameStop = random(2000);
     delay(3000);
     for (int i = 0; i < 4; i++)
     {
@@ -1202,14 +1252,14 @@ void scoreControl(void)
     {
       for (uint16_t n = 0; n < stripe[0].numPixels(); n++)
       {
-        stripe[i].setPixelColor(n, 0x00FF00);
+        stripe[i].setPixelColor(n, 0x007070);
       }
       stripe[i].show();
     }
     p1score = 0;
     p2score = 0;
     flagGame = false;
-    gameStop = random(5000);
+    gameStop = random(2000);
     delay(3000);
     for (int i = 0; i < 4; i++)
     {
