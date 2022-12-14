@@ -135,7 +135,7 @@ void buildStripe(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, 
     @param  &programma указатель на переменную действующей программы
     @param  &firstPixelHue Последний параметр Hue для первого пикселя режима Rainbow
     @param  &roundcount Каунтер цикла
-    @param  sp Параметр скорости 
+    @param  sp Параметр скорости
     @return  void
   */
 void buildTree(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp);
@@ -195,9 +195,9 @@ unsigned int gameStop;    // Переменная для хранения вре
 //----------------------------STATIC LIGHTS-------------------------\/
 static const uint32_t staticColor[] PROGMEM{
     0xFF0000, // RED
-    0xFF7F00, // YELLOW RED 
+    0xFF7F00, // YELLOW RED
     0xFFFF00, // YELLOW
-    0x7FFF00, // YELLOW GREEN 
+    0x7FFF00, // YELLOW GREEN
     0x00FF00, // GREEN
     0x00FF7F, // CYAN GREEN
     0x00FFFF, // CYAN
@@ -549,10 +549,12 @@ void buildStripe(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, 
 
     for (int i = 0; i < 4; i++)
     {
-      colRand = strip.gamma32(strip.ColorHSV((uint16_t)random()));
-      strip.setPixelColor(roundcount, colRand);
+      uint16_t hue = firstPixelHue + roundcount * 65536L / (strip.numPixels()/2);
+      uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
+      strip.setPixelColor(roundcount, color);
       strip.show();
     }
+    firstPixelHue += 65535/32;
     roundcount++;
   }
   break;
@@ -725,10 +727,14 @@ void buildTree(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp
 
     for (int i = 0; i < 4; i++)
     {
-      colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
-      stripe[i].setPixelColor(roundcount, colRand);
+      uint16_t hue = firstPixelHue + roundcount * 65536L / (stripe[0].numPixels() + 1);
+      uint32_t color = stripe[0].gamma32(stripe[0].ColorHSV(hue)); // hue -> RGB
+      stripe[i].setPixelColor(roundcount, color);
+      // colRand = stripe[0].gamma32(stripe[0].ColorHSV((uint16_t)random()));
+      // stripe[i].setPixelColor(roundcount, colRand);
       stripe[i].show();
     }
+    firstPixelHue += 65535 / 32;
     roundcount++;
   }
   break;
