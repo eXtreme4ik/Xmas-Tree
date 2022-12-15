@@ -26,8 +26,8 @@
 
 #define STAR_PIN 9         // Пин ленты звезды
 #define BUTTONS_ADC_PIN 14 // Пин кнопок
-#define LED_BLUE 17        // Пин синего светодиода VD3
-#define LED_GREEN 16       // Пин зеленого светодиода VD2
+#define LED_BLUE 17        // Пин синего светодиода VD2
+#define LED_GREEN 16       // Пин зеленого светодиода VD3
 #define LED_RED 18         // Пин красного светодиода VD1
 #define LED_YELLOW 15      // Пин желтого светодиода VD4
 
@@ -80,10 +80,10 @@
 
 //-----------------------------PRESETS FOR MACRO---------------------\/
 
-#define BUTTON_UP SW2          // Выбор значения напряжения для кнопки 2.4-2.6V
-#define BUTTON_DOWN SW1        // Выбор значения напряжения для кнопки 1.6-1.8V
-#define BUTTON_MODE SW3        // Выбор значения напряжения для кнопки 3.2-3.4V
-#define BUTTON_UP_AND_DOWN SW4 // Выбор значения напряжения для кнопки 2.9-3.1V
+#define BUTTON_UP SW2          // Выбор значения напряжения для кнопки 2.4-2.6V (+)
+#define BUTTON_DOWN SW1        // Выбор значения напряжения для кнопки 1.6-1.8V (-)
+#define BUTTON_MODE SW3        // Выбор значения напряжения для кнопки 3.2-3.4V (Режим)
+#define BUTTON_UP_AND_DOWN SW4 // Выбор значения напряжения для кнопки 2.9-3.1V (- и Режим одновременно)
 
 //----------------------------EXAMPLE FOR MACRO----------------------\/
 //
@@ -583,13 +583,49 @@ void buildStripe(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, 
     strip.show();
   }
   break;
+  case 11: // FIRE TREE
+  {
+    for (uint16_t i = 0; i < strip.numPixels(); i++)
+    {
+      uint8_t flicker = random(1, 70);
+      uint8_t r = 255;
+      uint8_t g = flicker;
+      uint8_t b = g / 10;
+      strip.setPixelColor(i, strip.Color(r, g, b));
+      strip.show();
+    }
+  }
+  break;
+  case 12: // XMAS LIGHTS
+  {
+    for (uint16_t c = 0; c < 3; c++)
+    {
+      uint8_t snowR = random(2);
+      uint8_t snowG;
+      if (snowR)
+      {
+        snowR = 0xFF;
+        snowG = 0x00;
+      }
+      if (!snowR)
+      {
+        snowR = 0x00;
+        snowG = 0xFF;
+      }
+      uint32_t color = strip.Color(snowR, snowG, 0);
+      strip.setPixelColor(random(strip.numPixels()), color);
+    }
+    strip.show();
+    strip.clear();
+  }
+  break;
   default:
   {
-    if (programma > 10)
+    if (programma > 12)
       programma = 1;
     if (programma == 0)
     {
-      programma = 10;
+      programma = 12;
     }
   }
   break;
@@ -776,12 +812,59 @@ void buildTree(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp
     }
   }
   break;
+  case 11: // FIRE TREE
+  {
+    for (uint16_t i = 0; i < stripe1.numPixels(); i++)
+    {
+      
+      uint8_t flicker = random(1, 70);
+      uint8_t r = 255; 
+      uint8_t g = flicker;
+      uint8_t b = g / 10;
+      for (int n = 0; n < 4; n++)
+      {
+        stripe[n].setPixelColor(i, stripe1.Color(r, g, b));
+      }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+      stripe[i].show();
+    }
+  }
+  break;
+  case 12: // XMAS LIGHTS
+  {
+    for (uint16_t c = 0; c < 3; c++)
+    {
+      uint8_t snowR = random(2);
+      uint8_t snowG;
+      if (snowR)
+      {
+        snowR = 0xFF;
+        snowG = 0x00;
+      }
+      if (!snowR)
+      {
+        snowR = 0x00;
+        snowG = 0xFF;
+      }
+      uint32_t color = stripe[0].Color(snowR, snowG, 0);
+      for (int i = 0; i < 4; i++)
+        stripe[i].setPixelColor(random(stripe1.numPixels()), color);
+    }
+    for (int i = 0; i < 4; i++)
+    {
+      stripe[i].show();
+      stripe[i].clear();
+    }
+  }
+  break;
   default:
   {
-    if (programma > 10)
+    if (programma > 12)
       programma = 1;
     if (programma == 0)
-      programma = 10;
+      programma = 12;
   }
   break;
   }
@@ -968,7 +1051,7 @@ void __vector_13(void)
     {
       if (testLight)
       {
-        progStripe = 5;
+        progStripe = 3;
         eeprom_write_byte((uint8_t *)0x01, progStripe);
         testLight = false;
       }
