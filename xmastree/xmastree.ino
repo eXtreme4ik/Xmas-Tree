@@ -50,9 +50,9 @@
 #define LED_SPEED LED_YELLOW   // Светодиод ответственный за выбор скорости
 
 #define BRIGHT_MAX 255              // Максимально возможная яркость
-#define SPEED_MAX 10000             // Максимально возможное замедление
-#define SPEED_STEP 500              // Шаг изменения замедления
-#define SPEED_MIN 500               // Минимально возможное замедление (Далее всё сливается в кучу)
+#define SPEED_MAX 20000            // Максимально возможное замедление
+#define SPEED_STEP 200              // Шаг изменения замедления
+#define SPEED_MIN 200               // Минимально возможное замедление (Далее всё сливается в кучу)
 #define CORRECT_SPEED_RAINBOW 10    // Коэффициент коррекции скорости режима rainbow
 #define SPEED_RAINBOW_COEF 512      // Переменная коррекции скорости режима rainbow
 #define BRIGHT_STEP BRIGHT_MAX / 30 // Шаг изменения яркости
@@ -175,10 +175,10 @@ unsigned int speedStar = 1000;   // Скорость звезды
 // Флаги
 char firststart = 1;             // Флаг первого запуска
 char testLight = false;          // Флаг тестового Белого цвета
-bool save = false;               // Флаг сохранения параметров
-bool up = false;                 // Флаг нажатия кнопки +
-bool dn = false;                 // Флаг нажатия кнопки -
-bool md = false;                 // Флаг нажатия кнопки Режим
+volatile bool save = false;               // Флаг сохранения параметров
+volatile bool up = false;                 // Флаг нажатия кнопки +
+volatile bool dn = false;                 // Флаг нажатия кнопки -
+volatile bool md = false;                 // Флаг нажатия кнопки Режим
 bool sync = false;               // Флаг синхронизации программы звезды и ёлки
 volatile bool flagLight = false; // Флаг включения режима свечения в игре
 volatile bool flagGame = false;  // Флаг включения режима игры
@@ -349,14 +349,14 @@ void loop()
   else // Используем стандартную иллюминацию
   {
     //................................................................
-    if (speedStripe == progCountStripe) // Если попали в Каунтер, запускаем функцию Ёлки
+    if (speedStripe <= progCountStripe) // Если попали в Каунтер, запускаем функцию Ёлки
     {
       buildTree(progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
       progCountStripe = 1; // Обнуляем каунтер
     }
 
     //................................................................
-    if (speedStar == progCountStar) // Если попали в Каунтер, запускаем функцию Звезды
+    if (speedStar <= progCountStar) // Если попали в Каунтер, запускаем функцию Звезды
     {
       // Если программа Ёлки и Звезды - бегущий огонь, синхронизируем их
       //------------------------------------------------------------------
