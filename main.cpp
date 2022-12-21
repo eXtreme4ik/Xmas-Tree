@@ -27,8 +27,8 @@
 
 #define STAR_PIN 9         // Пин ленты звезды
 #define BUTTONS_ADC_PIN 14 // Пин кнопок
-#define LED_BLUE 17        // Пин синего светодиода VD3
-#define LED_GREEN 16       // Пин зеленого светодиода VD2
+#define LED_BLUE 17        // Пин синего светодиода VD2
+#define LED_GREEN 16       // Пин зеленого светодиода VD3
 #define LED_RED 18         // Пин красного светодиода VD1
 #define LED_YELLOW 15      // Пин желтого светодиода VD4
 
@@ -51,9 +51,9 @@
 #define LED_SPEED LED_YELLOW   // Светодиод ответственный за выбор скорости
 
 #define BRIGHT_MAX 255              // Максимально возможная яркость
-#define SPEED_MAX 10000             // Максимально возможное замедление
-#define SPEED_STEP 500              // Шаг изменения замедления
-#define SPEED_MIN 500               // Минимально возможное замедление (Далее всё сливается в кучу)
+#define SPEED_MAX 20000            // Максимально возможное замедление
+#define SPEED_STEP 200              // Шаг изменения замедления
+#define SPEED_MIN 200               // Минимально возможное замедление (Далее всё сливается в кучу)
 #define CORRECT_SPEED_RAINBOW 10    // Коэффициент коррекции скорости режима rainbow
 #define SPEED_RAINBOW_COEF 512      // Переменная коррекции скорости режима rainbow
 #define BRIGHT_STEP BRIGHT_MAX / 30 // Шаг изменения яркости
@@ -81,10 +81,10 @@
 
 //-----------------------------PRESETS FOR MACRO---------------------\/
 
-#define BUTTON_UP SW2          // Выбор значения напряжения для кнопки 2.4-2.6V
-#define BUTTON_DOWN SW1        // Выбор значения напряжения для кнопки 1.6-1.8V
-#define BUTTON_MODE SW3        // Выбор значения напряжения для кнопки 3.2-3.4V
-#define BUTTON_UP_AND_DOWN SW4 // Выбор значения напряжения для кнопки 2.9-3.1V
+#define BUTTON_UP SW2          // Выбор значения напряжения для кнопки 2.4-2.6V (+)
+#define BUTTON_DOWN SW1        // Выбор значения напряжения для кнопки 1.6-1.8V (-)
+#define BUTTON_MODE SW3        // Выбор значения напряжения для кнопки 3.2-3.4V (Режим)
+#define BUTTON_UP_AND_DOWN SW4 // Выбор значения напряжения для кнопки 2.9-3.1V (- и Режим одновременно)
 
 //----------------------------EXAMPLE FOR MACRO----------------------\/
 //
@@ -176,10 +176,10 @@ unsigned int speedStar = 1000;   // Скорость звезды
 // Флаги
 char firststart = 1;             // Флаг первого запуска
 char testLight = false;          // Флаг тестового Белого цвета
-bool save = false;               // Флаг сохранения параметров
-bool up = false;                 // Флаг нажатия кнопки +
-bool dn = false;                 // Флаг нажатия кнопки -
-bool md = false;                 // Флаг нажатия кнопки Режим
+volatile bool save = false;               // Флаг сохранения параметров
+volatile bool up = false;                 // Флаг нажатия кнопки +
+volatile bool dn = false;                 // Флаг нажатия кнопки -
+volatile bool md = false;                 // Флаг нажатия кнопки Режим
 bool sync = false;               // Флаг синхронизации программы звезды и ёлки
 volatile bool flagLight = false; // Флаг включения режима свечения в игре
 volatile bool flagGame = false;  // Флаг включения режима игры
@@ -187,14 +187,14 @@ volatile bool tap1 = false;      // Флаг нажатия кнопки (Пор
 volatile bool tap2 = false;      // Флаг нажатия кнопки (Порт UART)
 
 // Переменные режима игры (Опционально)
-volatile uint16_t treeStripe = 0;  // Переменная хранения рандомного значения строки светодиодов
-volatile uint16_t treeLed = 0;     // Переменная хранения рандомного значения светодиода в строке
-volatile unsigned int p1score = 0; // Переменная счёта игрока 1
-volatile unsigned int p2score = 0; // Переменная счёта игрока 2
-volatile unsigned int gameStop;    // Переменная для хранения времени включения Лампы в игре
-volatile uint8_t colorGameP1 = 0;// Переменная выбранного цвета игроком 1
-volatile uint8_t colorGameP2 = 0;// Переменная выбранного цвета игроком 2
-volatile uint8_t trueColorGame = 0;//Переменная реального цвета 
+volatile uint16_t treeStripe = 0;   // Переменная хранения рандомного значения строки светодиодов
+volatile uint16_t treeLed = 0;      // Переменная хранения рандомного значения светодиода в строке
+volatile unsigned int p1score = 0;  // Переменная счёта игрока 1
+volatile unsigned int p2score = 0;  // Переменная счёта игрока 2
+volatile unsigned int gameStop;     // Переменная для хранения времени включения Лампы в игре
+volatile uint8_t colorGameP1 = 0;   // Переменная выбранного цвета игроком 1
+volatile uint8_t colorGameP2 = 0;   // Переменная выбранного цвета игроком 2
+volatile uint8_t trueColorGame = 0; // Переменная реального цвета
 
 //----------------------------STATIC LIGHTS-------------------------\/
 static const uint32_t staticColor[] PROGMEM{
@@ -218,7 +218,7 @@ static const uint32_t staticColorGame[] PROGMEM{
     0x00FF00, // GREEN
     // 0x00FFFF, // CYAN
     0x0000FF, // BLUE
-    // 0xFF00FF, // MAGENTA
+              // 0xFF00FF, // MAGENTA
               // ... and more
 };
 const uint8_t staticColorMax = (sizeof(staticColor) / sizeof(uint32_t)) - 1;
@@ -350,14 +350,14 @@ void loop()
   else // Используем стандартную иллюминацию
   {
     //................................................................
-    if (speedStripe == progCountStripe) // Если попали в Каунтер, запускаем функцию Ёлки
+    if (speedStripe <= progCountStripe) // Если попали в Каунтер, запускаем функцию Ёлки
     {
       buildTree(progStripe, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
       progCountStripe = 1; // Обнуляем каунтер
     }
 
     //................................................................
-    if (speedStar == progCountStar) // Если попали в Каунтер, запускаем функцию Звезды
+    if (speedStar <= progCountStar) // Если попали в Каунтер, запускаем функцию Звезды
     {
       // Если программа Ёлки и Звезды - бегущий огонь, синхронизируем их
       //------------------------------------------------------------------
@@ -584,13 +584,49 @@ void buildStripe(Adafruit_NeoPixel &strip, char &programma, int &firstPixelHue, 
     strip.show();
   }
   break;
+  case 11: // FIRE TREE
+  {
+    for (uint16_t i = 0; i < strip.numPixels(); i++)
+    {
+      uint8_t flicker = random(1, 70);
+      uint8_t r = 255;
+      uint8_t g = flicker;
+      uint8_t b = g / 10;
+      strip.setPixelColor(i, strip.Color(r, g, b));
+      strip.show();
+    }
+  }
+  break;
+  case 12: // XMAS LIGHTS
+  {
+    for (uint16_t c = 0; c < 3; c++)
+    {
+      uint8_t snowR = random(2);
+      uint8_t snowG;
+      if (snowR)
+      {
+        snowR = 0xFF;
+        snowG = 0x00;
+      }
+      if (!snowR)
+      {
+        snowR = 0x00;
+        snowG = 0xFF;
+      }
+      uint32_t color = strip.Color(snowR, snowG, 0);
+      strip.setPixelColor(random(strip.numPixels()), color);
+    }
+    strip.show();
+    strip.clear();
+  }
+  break;
   default:
   {
-    if (programma > 10)
+    if (programma > 12)
       programma = 1;
     if (programma == 0)
     {
-      programma = 10;
+      programma = 12;
     }
   }
   break;
@@ -777,12 +813,59 @@ void buildTree(char &programma, int &firstPixelHue, uint16_t &roundcount, int sp
     }
   }
   break;
+  case 11: // FIRE TREE
+  {
+    for (uint16_t i = 0; i < stripe1.numPixels(); i++)
+    {
+      
+      uint8_t flicker = random(1, 70);
+      uint8_t r = 255; 
+      uint8_t g = flicker;
+      uint8_t b = g / 10;
+      for (int n = 0; n < 4; n++)
+      {
+        stripe[n].setPixelColor(i, stripe1.Color(r, g, b));
+      }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+      stripe[i].show();
+    }
+  }
+  break;
+  case 12: // XMAS LIGHTS
+  {
+    for (uint16_t c = 0; c < 3; c++)
+    {
+      uint8_t snowR = random(2);
+      uint8_t snowG;
+      if (snowR)
+      {
+        snowR = 0xFF;
+        snowG = 0x00;
+      }
+      if (!snowR)
+      {
+        snowR = 0x00;
+        snowG = 0xFF;
+      }
+      uint32_t color = stripe[0].Color(snowR, snowG, 0);
+      for (int i = 0; i < 4; i++)
+        stripe[i].setPixelColor(random(stripe1.numPixels()), color);
+    }
+    for (int i = 0; i < 4; i++)
+    {
+      stripe[i].show();
+      stripe[i].clear();
+    }
+  }
+  break;
   default:
   {
-    if (programma > 10)
+    if (programma > 12)
       programma = 1;
     if (programma == 0)
-      programma = 10;
+      programma = 12;
   }
   break;
   }
@@ -969,7 +1052,7 @@ void __vector_13(void)
     {
       if (testLight)
       {
-        progStripe = 5;
+        progStripe = 3;
         eeprom_write_byte((uint8_t *)0x01, progStripe);
         testLight = false;
       }
