@@ -1330,6 +1330,7 @@ void __vector_13(void)
         break;
       }
       pkg.cmd = 0;
+      rColor = 0;
     }
     if (md)
     {
