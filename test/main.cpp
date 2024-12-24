@@ -146,6 +146,7 @@ typedef enum
   TREE_ERROR_UART_CMD,
   TREE_ERROR_UART_ARG,
   TREE_ERROR_UART_CRC,
+  TREE_START,
 } tree_err_t;
 #elif
 #define GAME_MODE
@@ -291,14 +292,14 @@ volatile bool tap2 = false;      // Флаг нажатия кнопки (Пор
 bool cleared = 0;
 
 // Переменные режима игры (Опционально)
-volatile uint16_t treeStripe = 0;   // Переменная хранения рандомного значения строки светодиодов
-volatile uint16_t treeLed = 0;      // Переменная хранения рандомного значения светодиода в строке
-volatile unsigned int p1score = 0;  // Переменная счёта игрока 1
-volatile unsigned int p2score = 0;  // Переменная счёта игрока 2
-volatile unsigned int gameStop;     // Переменная для хранения времени включения Лампы в игре
-volatile uint8_t colorGameP1 = 0;   // Переменная выбранного цвета игроком 1
-volatile uint8_t colorGameP2 = 0;   // Переменная выбранного цвета игроком 2
-volatile uint8_t trueColorGame = 0; // Переменная реального цвета
+// volatile uint16_t treeStripe = 0;   // Переменная хранения рандомного значения строки светодиодов
+// volatile uint16_t treeLed = 0;      // Переменная хранения рандомного значения светодиода в строке
+// volatile unsigned int p1score = 0;  // Переменная счёта игрока 1
+// volatile unsigned int p2score = 0;  // Переменная счёта игрока 2
+// volatile unsigned int gameStop;     // Переменная для хранения времени включения Лампы в игре
+// volatile uint8_t colorGameP1 = 0;   // Переменная выбранного цвета игроком 1
+// volatile uint8_t colorGameP2 = 0;   // Переменная выбранного цвета игроком 2
+// volatile uint8_t trueColorGame = 0; // Переменная реального цвета
 
 //----------------------------STATIC LIGHTS-------------------------\/
 static const uint32_t staticColor[] PROGMEM{
@@ -368,8 +369,8 @@ void setup()
   pinMode(LED_PROGRAMM, OUTPUT);
   pinMode(LED_SPEED, OUTPUT);
   // Инициализируем пины для режима игры
-  pinMode(0, INPUT_PULLUP);
-  pinMode(1, OUTPUT);
+  // pinMode(0, INPUT_PULLUP);
+  // pinMode(1, OUTPUT);
   // Для музыки
   pinMode(DI0, INPUT_PULLUP);
   pinMode(DI1, INPUT_PULLUP);
@@ -404,7 +405,7 @@ void setup()
     star.show();
   }
   randomSeed(analogRead(19)); // Организуем рандом из космоса
-  gameStop = random(2000);    // Присваиваем рандомное значение для игры
+  // gameStop = random(2000);    // Присваиваем рандомное значение для игры
   // trueColorGame = random(staticColorGameMax);
   // colorGameP2 = random(staticColorGameMax);
   // colorGameP1 = random(staticColorGameMax);
@@ -420,8 +421,8 @@ void setup()
   UBRR0L = 51; // baud rate 9600 = 103, 19200 = 51
   UCSR0B |= (1 << RXCIE0) | (1 << RXEN0) | (1 << TXEN0);
   UCSR0C |= (1 << UCSZ01) | (1 << UCSZ00); // 8 bit, 1 stop bit
-  const char preamble[] = ("XMastree v3.0 by Author\n");
-  uartPrint(preamble);
+  uartPrint(PREAMBLE);
+  uartPrint(TREE_START);
 #endif
 }
 //....................................................................................
@@ -483,8 +484,6 @@ void loop()
   {
     buildStripe(star, rColor, firstPixelHueStar, roundcountStar, speedStar / CORRECT_SPEED_RAINBOW);
     buildTree(rColor, firstPixelHueStripe, roundcountStripe, speedStripe / CORRECT_SPEED_RAINBOW);
-    brightStar = pkg.pcw;
-    brightStripe = brightStar;
   }
   else if (rColor == CODE_RPIXEL)
   {
@@ -554,12 +553,12 @@ void loop()
 
     //................................................................
   }
-  if (uartCount == UART_TIMEOUT)
-  {
-    if (uartPackageAvailable())
-      uartRecieveHandler();
-    uartCount = 0;
-  }
+  // if (uartCount == UART_TIMEOUT)
+  // {
+  if (uartPackageAvailable())
+    uartRecieveHandler();
+  //   uartCount = 0;
+  // }
   uartCount++;
   // uartRecieveHandler();
   if (load == true)
@@ -1151,37 +1150,37 @@ void __vector_9(void)
     maxMusicNums = LED_4STRIPE;
     break;
   }
-  if (tap1) // Манипуляции по нажатию кнопки
-  {
-    if (flagLight && trueColorGame == colorGameP1)
-    {
-      p1score++;
-      colorGameP1 = random(staticColorGameMax);
-    }
-    else
-    {
-      if (p1score)
-        p1score--;
-    }
-    flagLight = false;
-    tap1 = false;
-  }
+  // if (tap1) // Манипуляции по нажатию кнопки
+  // {
+  //   if (flagLight && trueColorGame == colorGameP1)
+  //   {
+  //     p1score++;
+  //     colorGameP1 = random(staticColorGameMax);
+  //   }
+  //   else
+  //   {
+  //     if (p1score)
+  //       p1score--;
+  //   }
+  //   flagLight = false;
+  //   tap1 = false;
+  // }
 
-  if (tap2 && trueColorGame == colorGameP2) // Манипуляции по нажатию кнопки
-  {
-    if (flagLight)
-    {
-      p2score++;
-      colorGameP2 = random(staticColorGameMax);
-    }
-    else
-    {
-      if (p2score)
-        p2score--;
-    }
-    flagLight = false;
-    tap2 = false;
-  }
+  // if (tap2 && trueColorGame == colorGameP2) // Манипуляции по нажатию кнопки
+  // {
+  //   if (flagLight)
+  //   {
+  //     p2score++;
+  //     colorGameP2 = random(staticColorGameMax);
+  //   }
+  //   else
+  //   {
+  //     if (p2score)
+  //       p2score--;
+  //   }
+  //   flagLight = false;
+  //   tap2 = false;
+  // }
   switch (mode) // Организация свечения статусных светодиодов согласно режиму
   {
   case MODE_DEFAULT:
@@ -1317,20 +1316,25 @@ void __vector_13(void)
       switch (pkg.arg)
       {
       case CMD_MODE:
+      {
         md = true;
         pkg.pcr = 0;
-        break;
+      }
+      break;
       case CMD_UP:
+      {
         up = true;
         pkg.pcr = 0;
-        break;
+      }
+      break;
       case CMD_DOWN:
+      {
         dn = true;
         pkg.pcr = 0;
-        break;
+      }
+      break;
       }
       pkg.cmd = 0;
-      rColor = 0;
     }
     if (md)
     {
@@ -1677,8 +1681,11 @@ ISR(USART_RX_vect)
     if (rxindex == 7)
     {
       rxindex = 0;
-      rxPacketAvailable = true;
-      rxPacketstart = false;
+      if (rxPacketstart)
+      {
+        rxPacketAvailable = true;
+        rxPacketstart = false;
+      }
     }
   }
 }
@@ -1693,14 +1700,16 @@ void uartRecieveHandler(void)
   // CRC CHECKING;
   uint8_t keyWord[6] = {0xCC, 0xC8, 0xD5, 0xC0, 0xC8, 0xCB};
   uint16_t crcdata = (8 << rxbuffer[P_CRC1]) + rxbuffer[P_CRC2];
-  uint16_t crctemp = 0;
-  for (int i = 0; i < 6; i++)
-  {
-    crctemp += rxbuffer[i] | keyWord[i];
+  if (!(crcdata & !(uint16_t)0xABCD)){
+    uint16_t crctemp = 0;
+    for (int i = 0; i < 6; i++)
+    {
+      crctemp += rxbuffer[i] | keyWord[i];
+    }
+    crcdata = !(crcdata + !crctemp);
   }
-  crcdata = !(crcdata + !crctemp);
   // CRC CHECKING;
-  crcdata = 0;
+  // crcdata = 0;
   // // CRC CALCULATING;
   if (!crcdata)
   {
@@ -1746,29 +1755,30 @@ tree_err_t cmdHandler(void)
     {
     case CMD_SYSTEM:
     {
-      if (pkg.arg == CMD_STANDBY_OFF)
+      if (rxbuffer[P_ARG1_R] == CMD_STANDBY_OFF)
       {
         standby = true;
         return TREE_OK;
       }
-      else if (pkg.arg == CMD_STANDBY_ON)
+      else if (rxbuffer[P_ARG1_R] == CMD_STANDBY_ON)
       {
         standby = false;
         return TREE_OK;
       }
-      else if (pkg.arg == CMD_EEPROM_SAVE)
+      else if (rxbuffer[P_ARG1_R] == CMD_EEPROM_SAVE)
       {
         save = true;
         return TREE_OK;
       }
-      else if (pkg.arg == CMD_EEPROM_LOAD)
+      else if (rxbuffer[P_ARG1_R] == CMD_EEPROM_LOAD)
       {
         rColor = 0;
         load = true;
         return TREE_OK;
       }
-      else if (CMD_DOWN > pkg.arg && pkg.arg > CMD_MODE)
+      else if (CMD_DOWN >= rxbuffer[P_ARG1_R] && rxbuffer[P_ARG1_R] >= CMD_MODE)
       {
+        rColor = 0;
         return TREE_OK;
       }
       else
@@ -1784,6 +1794,8 @@ tree_err_t cmdHandler(void)
       pkg.pcg = rxbuffer[P_ARG2_G];
       pkg.pcb = rxbuffer[P_ARG3_B];
       pkg.pcw = rxbuffer[P_ARG4_W];
+      brightStar = pkg.pcw;
+      brightStripe = brightStar;
       return TREE_OK;
     }
     break;
